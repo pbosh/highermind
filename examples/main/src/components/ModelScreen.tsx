@@ -53,7 +53,7 @@ export default function ModelScreen() {
 
       <div className="model-management">
         <h1 className="text-2xl mt-6 mb-4">
-          Custom models
+          Load Custom Models
           <button
             className="btn btn-primary btn-outline btn-sm ml-6"
             onClick={() => setShowAddCustom(true)}
@@ -73,7 +73,7 @@ export default function ModelScreen() {
 
       
       <div className="inference-params pt-8">
-        <h1 className="text-2xl mb-4">Inference parameters</h1>
+        <h1 className="text-2xl mb-4">Conversation Parameters</h1>
         <label className="input input-bordered flex items-center gap-2 mb-2">
           # threads
           <input
@@ -376,19 +376,21 @@ function ModelCard({
               >
                 Load model
               </button>
-              <button
-                className="btn btn-outline btn-error btn-sm mr-2"
-                onClick={() => {
-                  if (
-                    confirm('Are you sure to remove this model from cache?')
-                  ) {
-                    removeCachedModel(m);
-                  }
-                }}
-                disabled={blockModelBtn}
-              >
-                <FontAwesomeIcon icon={faTrashAlt} />
-              </button>
+              {m.isUserAdded && (
+                <button
+                  className="btn btn-outline btn-error btn-sm mr-2"
+                  onClick={() => {
+                    if (
+                      confirm('Are you sure to remove this model from cache?')
+                    ) {
+                      removeCachedModel(m);
+                    }
+                  }}
+                  disabled={blockModelBtn}
+                >
+                  <FontAwesomeIcon icon={faTrashAlt} />
+                </button>
+              )}
             </>
           )}
           {m.state === ModelState.LOADED && (

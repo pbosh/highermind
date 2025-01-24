@@ -9,6 +9,24 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 ##########
 
 
+#####################################
+
+## [0.0.5] - 2024-01-22
+
+### Added
+- 
+
+
+### Changed
+- removed the ability to delete default models including the icon etc.
+
+
+
+
+
+
+
+
 
 #####################################
 
@@ -22,17 +40,6 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 - Manage models page order changed
 - remove large model warning
 - default first run now goes to new conversation
-
-
-
-
-
-
-
-
-
-
-
 
 
 
