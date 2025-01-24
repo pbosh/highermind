@@ -15,8 +15,8 @@ export const MAX_GGUF_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
 
 export const LIST_MODELS = [
   {
-    url: 'https://huggingface.co/ngxson/SmolLM2-360M-Instruct-Q8_0-GGUF/resolve/main/smollm2-360m-instruct-q8_0.gguf',
-    size: 386404992,
+    url: 'https://huggingface.co/HigherMind/Make-Better-Decisions-1-Q3_K_L-GGUF/resolve/main/make-better-decisions-1-q3_k_l-00001-of-00008.gguf',
+    size: 3886404992,
   },
   {
     url: 'https://huggingface.co/hugging-quants/Llama-3.2-1B-Instruct-Q4_K_M-GGUF/resolve/main/llama-3.2-1b-instruct-q4_k_m.gguf',
@@ -54,10 +54,10 @@ export const LIST_MODELS = [
 
 export const DEFAULT_INFERENCE_PARAMS: InferenceParams = {
   nThreads: -1, // auto
-  nContext: 4096,
-  nPredict: 4096,
+  nContext: 2048,
+  nPredict: 200,
   nBatch: 128,
-  temperature: 0.2,
+  temperature: 0.8,
 };
 
 export const DEFAULT_CHAT_TEMPLATE =
