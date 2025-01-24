@@ -4,10 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTrashAlt,
   faXmark,
-  faWarning,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
-import { DEFAULT_INFERENCE_PARAMS, MAX_GGUF_SIZE } from '../config';
+import { DEFAULT_INFERENCE_PARAMS } from '../config';
 import { toHumanReadableSize, useDebounce } from '../utils/utils';
 import { useEffect, useState } from 'react';
 import ScreenWrapper from './ScreenWrapper';
@@ -31,8 +30,48 @@ export default function ModelScreen() {
     setParams({ ...currParams, [key]: parseFloat(e.target.value || -1) });
   };
 
+
+
+
+  
   return (
     <ScreenWrapper>
+
+      <div className="model-management">
+        <h1 className="text-2xl mt-6 mb-4">Choose the AI model you would like to talk to:</h1>
+
+        {models
+          .filter((m) => !m.isUserAdded)
+          .map((m) => (
+            <ModelCard key={m.url} model={m} blockModelBtn={blockModelBtn} />
+          ))}
+      </div>
+
+
+
+
+
+      <div className="model-management">
+        <h1 className="text-2xl mt-6 mb-4">
+          Custom models
+          <button
+            className="btn btn-primary btn-outline btn-sm ml-6"
+            onClick={() => setShowAddCustom(true)}
+          >
+            + Add GGUF
+          </button>
+        </h1>
+
+        {models
+          .filter((m) => m.isUserAdded)
+          .map((m) => (
+            <ModelCard key={m.url} model={m} blockModelBtn={blockModelBtn} />
+          ))}
+      </div>
+
+
+
+      
       <div className="inference-params pt-8">
         <h1 className="text-2xl mb-4">Inference parameters</h1>
         <label className="input input-bordered flex items-center gap-2 mb-2">
@@ -112,33 +151,7 @@ export default function ModelScreen() {
         </button>
       </div>
 
-      <div className="model-management">
-        <h1 className="text-2xl mt-6 mb-4">
-          Custom models
-          <button
-            className="btn btn-primary btn-outline btn-sm ml-6"
-            onClick={() => setShowAddCustom(true)}
-          >
-            + Add GGUF
-          </button>
-        </h1>
 
-        {models
-          .filter((m) => m.isUserAdded)
-          .map((m) => (
-            <ModelCard key={m.url} model={m} blockModelBtn={blockModelBtn} />
-          ))}
-      </div>
-
-      <div className="model-management">
-        <h1 className="text-2xl mt-6 mb-4">Recommended models</h1>
-
-        {models
-          .filter((m) => !m.isUserAdded)
-          .map((m) => (
-            <ModelCard key={m.url} model={m} blockModelBtn={blockModelBtn} />
-          ))}
-      </div>
 
       <div className="h-10" />
 
@@ -293,6 +306,7 @@ function ModelCard({
 
   const m = model;
   const percent = parseInt(Math.round(m.downloadPercent * 100).toString());
+
   return (
     <div
       className={`card bg-base-100 w-full mb-2 ${m.state === ModelState.LOADED ? 'border-2 border-primary' : ''}`}
@@ -300,22 +314,13 @@ function ModelCard({
     >
       <div className="card-body p-4 flex flex-row">
         <div className="grow">
+          {m.model_title && <h2 className="text-xl mb-2">{m.model_title}</h2>}
           <b>{m.hfPath.replace(/-\d{5}-of-\d{5}/, '-(shards)')}</b>
           <br />
           <small>
             HF repo: {m.hfModel}
             <br />
             Size: {toHumanReadableSize(m.size)}
-            {m.size > MAX_GGUF_SIZE && (
-              <div
-                className="tooltip tooltip-right"
-                data-tip="Big model size, may not be able to load due to RAM limitation"
-              >
-                <span className="text-yellow-300 ml-2">
-                  <FontAwesomeIcon icon={faWarning} />
-                </span>
-              </div>
-            )}
             {m.state == ModelState.DOWNLOADING
               ? ` - Downloaded: ${percent}%`
               : ''}

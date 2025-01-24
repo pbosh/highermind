@@ -31,7 +31,7 @@ export const WllamaStorage = {
 
 export const getDefaultScreen = (): Screen => {
   const welcome: boolean = WllamaStorage.load('welcome', true);
-  return welcome ? Screen.GUIDE : Screen.MODEL;
+  return welcome ? Screen.GUIDE : Screen.CHAT; //PB default screen on first run
 };
 
 export const formatChat = async (

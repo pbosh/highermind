@@ -2912,6 +2912,27 @@ git checkout -b rollback-v0.0.1 ABC123    # Replace ABC123 with same hash
 git checkout main && cd examples/main && npm run build && cd ../..
 ```
 
+FINAL commands that work:
+REBUILD and LAUNCH DEV SERVER localhost
+cd /Users/ms1282/devrepo/wllama-1/examples/main && npm run build && cd ../..
+
+MULTITHREAD=1 node scripts/http_server.js
+
+
+
+PUSH to GIT and subsequently CLOUDFLARE (automatic)
+cd /Users/ms1282/devrepo/wllama-1/examples/main && npm run build && cd ../.. && git add . && git commit -m "v$(node -p "require('./examples/main/package.json').version")" && git push
+
+^ the above is one line
+*edit changelog as this helps with any roll backs
+
+
+
+
+ROLL BACK to version n
+git log --grep="v0.0.1"    # Replace v0.0.1 with version you want
+
+git checkout ABC123    # Replace ABC123 with hash from step 1
 
 
 

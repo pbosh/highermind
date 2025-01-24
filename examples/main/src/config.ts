@@ -22,10 +22,12 @@ export const MAX_GGUF_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
 
 export const LIST_MODELS = [
   {
+    model_title: "Make Better Decisions",
     url: 'https://huggingface.co/HigherMind/Make-Better-Decisions-1-Q3_K_L-GGUF/resolve/main/make-better-decisions-1-q3_k_l-00001-of-00008.gguf',
     size: 3880000000,
   },
   {
+    model_title: "Alcohol Addiction Counselor",
     url: 'https://huggingface.co/HigherMind/Alcohol_Addiction-Q3_K_L-GGUF/resolve/main/alcohol_addiction-q3_k_l-00001-of-00008.gguf',
     size: 3880000000,
   },

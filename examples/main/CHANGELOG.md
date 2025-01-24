@@ -10,6 +10,30 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 
 
+#####################################
+
+## [0.0.4] - 2024-01-22
+
+### Added
+- Title to models
+
+
+### Changed
+- Manage models page order changed
+- remove large model warning
+- default first run now goes to new conversation
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #####################################
@@ -23,17 +47,6 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 ### Changed
 - Removed default wllama models from list
-
-
-
-
-
-
-
-
-
-
-
 
 
 

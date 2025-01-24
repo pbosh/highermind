@@ -8,19 +8,12 @@ export default function GuideScreen() {
   return (
     <ScreenWrapper>
       <div className="guide-text pt-16">
-        <h1 className="text-2xl font-bold mb-4">Wllama 🦙</h1>
+        <h1 className="text-2xl font-bold mb-4">HigherMind AI Models v0.1</h1>
 
         <div className="mb-3">
-          Wllama is a project based on{' '}
-          <a
-            href="https://github.com/ggerganov/llama.cpp"
-            target="_blank"
-            rel="noopener"
-          >
-            llama.cpp
-          </a>
-          . It enables running LLM inference directly on browser by leveraging
-          the power of <b>WebAssembly</b>. It accepts GGUF as model format.
+          HigherMind is providing free AI models for you to use. These models have been meticuously created using the best content from humanities entire written corpus. Eg. Classic books, newer books and philosophical concepts throughout the ages.
+          <br /><br />
+          *When newer books are concerned we have used concepts from within these books rather than copright content. For clarity no copyrighted content exists within any HigherMind model.
         </div>
 
         <div className="mb-3">
