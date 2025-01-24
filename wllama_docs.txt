@@ -1,0 +1,2865 @@
+=====================================================
+WLLAMA DOCS and READMES
+=====================================================
+
+
+Introducing Wllama V2.0
+What's new
+V2.0 introduces significant improvements in model management and caching. Key features include:
+
+Completely rewritten model downloader with service worker
+New ModelManager class providing comprehensive model handling and caching capabilities
+Enhanced testing system built on the vitest framework
+Added ModelManager
+The new ModelManager class provides a robust interface for handling model files:
+
+// Example usage
+const modelManager = new ModelManager();
+
+// List all models in cache
+const cachedModels = await modelManager.getModels();
+
+// Add a new model
+const model = await modelManager.downloadModel('https://example.com/model.gguf');
+
+// Check if model is valid (i.e. it is not corrupted)
+// If status === ModelValidationStatus.VALID, you can use the model
+// Otherwise, call model.refresh() to re-download it
+const status = await model.validate();
+
+// Re-download if needed (useful when remote model file has changed)
+await model.refresh();
+
+// Remove model from cache
+await model.remove();
+
+// Load the selected model into llama.cpp
+const wllama = new Wllama(CONFIG_PATHS);
+await wllama.loadModel(model);
+
+// Alternatively, you can also pass directly model URL like in v1.x
+// This will automatically download the model to cache
+await wllama.loadModelFromUrl('https://example.com/model.gguf');
+Key features of ModelManager:
+
+Automatic handling of split GGUF models
+Built-in model validation
+Parallel downloads of model shards
+Cache management with refresh and removal options
+Added loadModelFromHF
+A new helper function to load models directly from Hugging Face Hub. This is a convenient wrapper over loadModelFromUrl that handles HF repository URLs.
+
+await wllama.loadModelFromHF(
+  'ggml-org/models',
+  'tinyllamas/stories260K.gguf'
+);
+Migration to v2.0
+Simplified new Wllama() constructor
+In v2.0, the configuration paths have been simplified. You now only need to specify the *.wasm files, as the *.js files are no longer required.
+
+Previously in v1.x:
+
+const CONFIG_PATHS = {
+  'single-thread/wllama.js'       : '../../esm/single-thread/wllama.js',
+  'single-thread/wllama.wasm'     : '../../esm/single-thread/wllama.wasm',
+  'multi-thread/wllama.js'        : '../../esm/multi-thread/wllama.js',
+  'multi-thread/wllama.wasm'      : '../../esm/multi-thread/wllama.wasm',
+  'multi-thread/wllama.worker.mjs': '../../esm/multi-thread/wllama.worker.mjs',
+};
+const wllama = new Wllama(CONFIG_PATHS);
+From v2.0:
+
+// You only need to specify 2 files
+const CONFIG_PATHS = {
+  'single-thread/wllama.wasm': '../../esm/single-thread/wllama.wasm',
+  'multi-thread/wllama.wasm' : '../../esm/multi-thread/wllama.wasm',
+};
+const wllama = new Wllama(CONFIG_PATHS);
+Alternatively, you can use the *.wasm files from CDN:
+
+import WasmFromCDN from '@wllama/wllama/esm/wasm-from-cdn.js';
+const wllama = new Wllama(WasmFromCDN);
+// NOTE: this is not recommended
+// only use this when you can't embed wasm files in your project
+The Wllama constructor now accepts an optional second parameter of type WllamaConfig for configuration options:
+
+Important
+
+Most configuration options previously available in DownloadModelConfig used with loadModelFromUrl() have been moved to this constructor config.
+
+const wllama = new Wllama(CONFIG_PATHS, {
+  parallelDownloads: 5, // maximum concurrent downloads
+  allowOffline: false, // whether to allow offline model loading
+});
+Wllama.loadModelFromUrl
+As mentioned earlier, some options are moved to Wllama constructor, including:
+
+parallelDownloads
+allowOffline
+Other changes
+Wllama.downloadModel is removed. Please use ModelManager.downloadModel instead
+loadModelFromUrl won't check if cached model is up-to-date. You may need to manually call Model.refresh() to re-download the model.
+Changes in CacheManager:
+Added CacheManager.download function
+CacheManager.open(nameOrURL) now accepts both file name and original URL. It now returns a Blob instead of a ReadableStream
+Internal Changes
+Notable internal improvements made to the codebase:
+
+Comprehensive test coverage using vitest, with browser testing for Chrome and Firefox (Safari support planned for the future)
+Enhanced CI pipeline including validation for example builds, ESM compilation and lint checks
+
+
+=====================================================
+
+
+
+@wllama/wllama
+wllama - Wasm binding for llama.cpp
+
+
+WebAssembly binding for llama.cpp
+
+👉 Try the demo app
+
+📄 Documentation
+
+For changelog, please visit releases page
+
+Important
+
+Version 2.0 is released 👉 read more
+
+
+
+Features
+Typescript support
+Can run inference directly on browser (using WebAssembly SIMD), no backend or GPU is needed!
+No runtime dependency (see package.json)
+High-level API: completions, embeddings
+Low-level API: (de)tokenize, KV cache control, sampling control,...
+Ability to split the model into smaller files and load them in parallel (same as split and cat)
+Auto switch between single-thread and multi-thread build based on browser support
+Inference is done inside a worker, does not block UI render
+Pre-built npm package @wllama/wllama
+Limitations:
+
+To enable multi-thread, you must add Cross-Origin-Embedder-Policy and Cross-Origin-Opener-Policy headers. See this discussion for more details.
+No WebGPU support, but maybe possible in the future
+Max file size is 2GB, due to size restriction of ArrayBuffer. If your model is bigger than 2GB, please follow the Split model section below.
+Code demo and documentation
+📄 Documentation
+
+Demo:
+
+Basic usages with completions and embeddings: https://github.ngxson.com/wllama/examples/basic/
+Embedding and cosine distance: https://github.ngxson.com/wllama/examples/embeddings/
+For more advanced example using low-level API, have a look at test file: wllama.test.ts
+How to use
+Use Wllama inside React Typescript project
+Install it:
+
+npm i @wllama/wllama
+Copy
+Then, import the module:
+
+import { Wllama } from '@wllama/wllama';
+let wllamaInstance = new Wllama(WLLAMA_CONFIG_PATHS, ...);
+// (the rest is the same with earlier example)
+Copy
+For complete code example, see examples/main/src/utils/wllama.context.tsx
+
+NOTE: this example only covers completions usage. For embeddings, please see examples/embeddings/index.html
+
+Prepare your model
+It is recommended to split the model into chunks of maximum 512MB. This will result in slightly faster download speed (because multiple splits can be downloaded in parallel), and also prevent some out-of-memory issues.
+See the "Split model" section below for more details.
+It is recommended to use quantized Q4, Q5 or Q6 for balance among performance, file size and quality. Using IQ (with imatrix) is not recommended, may result in slow inference and low quality.
+Simple usage with ES6 module
+For complete code, see examples/basic/index.html
+
+import { Wllama } from './esm/index.js';
+
+(async () => {
+  const CONFIG_PATHS = {
+    'single-thread/wllama.wasm': './esm/single-thread/wllama.wasm',
+    'multi-thread/wllama.wasm' : './esm/multi-thread/wllama.wasm',
+  };
+  // Automatically switch between single-thread and multi-thread version based on browser support
+  // If you want to enforce single-thread, add { "n_threads": 1 } to LoadModelConfig
+  const wllama = new Wllama(CONFIG_PATHS);
+  // Define a function for tracking the model download progress
+  const progressCallback =  ({ loaded, total }) => {
+    // Calculate the progress as a percentage
+    const progressPercentage = Math.round((loaded / total) * 100);
+    // Log the progress in a user-friendly format
+    console.log(`Downloading... ${progressPercentage}%`);
+  };
+  // Load GGUF from Hugging Face hub
+  // (alternatively, you can use loadModelFromUrl if the model is not from HF hub)
+  await wllama.loadModelFromHF(
+    'ggml-org/models',
+    'tinyllamas/stories260K.gguf',
+    {
+      progressCallback,
+    }
+  );
+  const outputText = await wllama.createCompletion(elemInput.value, {
+    nPredict: 50,
+    sampling: {
+      temp: 0.5,
+      top_k: 40,
+      top_p: 0.9,
+    },
+  });
+  console.log(outputText);
+})();
+Copy
+Alternatively, you can use the *.wasm files from CDN:
+
+import WasmFromCDN from '@wllama/wllama/esm/wasm-from-cdn.js';
+const wllama = new Wllama(WasmFromCDN);
+// NOTE: this is not recommended, only use when you can't embed wasm files in your project
+Copy
+Split model
+Cases where we want to split the model:
+
+Due to size restriction of ArrayBuffer, the size limitation of a file is 2GB. If your model is bigger than 2GB, you can split the model into small files.
+Even with a small model, splitting into chunks allows the browser to download multiple chunks in parallel, thus making the download process a bit faster.
+We use llama-gguf-split to split a big gguf file into smaller files. You can download the pre-built binary via llama.cpp release page:
+
+# Split the model into chunks of 512 Megabytes
+./llama-gguf-split --split-max-size 512M ./my_model.gguf ./my_model
+Copy
+This will output files ending with -00001-of-00003.gguf, -00002-of-00003.gguf, and so on.
+
+You can then pass to loadModelFromUrl or loadModelFromHF the URL of the first file and it will automatically load all the chunks:
+
+const wllama = new Wllama(CONFIG_PATHS, {
+  parallelDownloads: 5, // optional: maximum files to download in parallel (default: 3)
+});
+await wllama.loadModelFromHF(
+  'ngxson/tinyllama_split_test',
+  'stories15M-q8_0-00001-of-00003.gguf'
+);
+Copy
+Custom logger (suppress debug messages)
+When initializing Wllama, you can pass a custom logger to Wllama.
+
+Example 1: Suppress debug message
+
+import { Wllama, LoggerWithoutDebug } from '@wllama/wllama';
+
+const wllama = new Wllama(pathConfig, {
+  // LoggerWithoutDebug is predefined inside wllama
+  logger: LoggerWithoutDebug,
+});
+Copy
+Example 2: Add emoji prefix to log messages
+
+const wllama = new Wllama(pathConfig, {
+  logger: {
+    debug: (...args) => console.debug('🔧', ...args),
+    log: (...args) => console.log('ℹ️', ...args),
+    warn: (...args) => console.warn('⚠️', ...args),
+    error: (...args) => console.error('☠️', ...args),
+  },
+});
+Copy
+How to compile the binary yourself
+This repository already come with pre-built binary from llama.cpp source code. However, in some cases you may want to compile it yourself:
+
+You don't trust the pre-built one.
+You want to try out latest - bleeding-edge changes from upstream llama.cpp source code.
+You can use the commands below to compile it yourself:
+
+# /!\ IMPORTANT: Require having docker compose installed
+
+# Clone the repository with submodule
+git clone --recurse-submodules https://github.com/ngxson/wllama.git
+cd wllama
+
+# Optionally, you can run this command to update llama.cpp to latest upstream version (bleeding-edge, use with your own risk!)
+# git submodule update --remote --merge
+
+# Install the required modules
+npm i
+
+# Firstly, build llama.cpp into wasm
+npm run build:wasm
+# Then, build ES module
+npm run build
+Copy
+TODO
+Add support for LoRA adapter
+Support GPU inference via WebGL
+Support multi-sequences: knowing the resource limitation when using WASM, I don't think having multi-sequences is a good idea
+Multi-modal: Waiting for refactoring LLaVA implementation from llama.cpp
+
+
+=====================================================
+
+
+@wllama/wllama
+@wllama/wllama
+
+E= Enumerations
+C= Classes
+I= Interfaces
+T= Type Aliases
+V= Variables
+
+
+E
+ModelValidationStatus
+C
+Model
+C
+ModelManager
+C
+Wllama
+C
+WllamaError
+I
+AssetsPathConfig
+I
+CacheEntry
+I
+CacheEntryMetadata
+I
+ChatCompletionOptions
+I
+ContextOptions
+I
+LoadedContextInfo
+I
+LoadModelConfig
+I
+ModelManagerParams
+I
+ModelMetadata
+I
+SamplingConfig
+I
+WllamaChatMessage
+I
+WllamaConfig
+I
+WllamaLogger
+T
+DownloadOptions
+T
+DownloadProgressCallback
+T
+WllamaErrorType
+V
+LoggerWithoutDebug
+V
+POLYFILL_ETAG
+E
+ModelValidationStatus
+C
+Model
+C
+ModelManager
+C
+Wllama
+C
+WllamaError
+I
+AssetsPathConfig
+I
+CacheEntry
+I
+CacheEntryMetadata
+I
+ChatCompletionOptions
+I
+ContextOptions
+I
+LoadedContextInfo
+I
+LoadModelConfig
+I
+ModelManagerParams
+I
+ModelMetadata
+I
+SamplingConfig
+I
+WllamaChatMessage
+I
+WllamaConfig
+I
+WllamaLogger
+T
+DownloadOptions
+T
+DownloadProgressCallback
+T
+WllamaErrorType
+V
+LoggerWithoutDebug
+V
+POLYFILL_ETAG
+@wllama/wllama
+ModelValidationStatus
+Model
+ModelManager
+Wllama
+WllamaError
+AssetsPathConfig
+CacheEntry
+CacheEntryMetadata
+ChatCompletionOptions
+ContextOptions
+LoadedContextInfo
+LoadModelConfig
+ModelManagerParams
+ModelMetadata
+SamplingConfig
+WllamaChatMessage
+WllamaConfig
+WllamaLogger
+DownloadOptions
+DownloadProgressCallback
+WllamaErrorType
+LoggerWithoutDebug
+POLYFILL_ETAG
+Generated using TypeDoc
+
+
+=====================================================
+
+
+@wllama/wllamaModelValidationStatus
+Enumeration ModelValidationStatus
+Status of the model validation
+
+Defined in src/model-manager.ts:24
+Enumeration Members
+P
+DELETED
+P
+INVALID
+P
+VALID
+DELETED
+DELETED: "deleted"
+Defined in src/model-manager.ts:27
+INVALID
+INVALID: "invalid"
+Defined in src/model-manager.ts:26
+VALID
+VALID: "valid"
+Defined in src/model-manager.ts:25
+
+
+=====================================================
+
+
+@wllama/wllamaModel
+Class Model
+Model class
+
+One model can have multiple shards, each shard is a GGUF file.
+
+Defined in src/model-manager.ts:55
+Constructors
+C
+constructor
+Properties
+P
+files
+P
+size
+P
+url
+Methods
+M
+open
+M
+refresh
+M
+remove
+M
+validate
+constructor
+new Model(
+    modelManager: ModelManager,
+    url: string,
+    savedFiles?: CacheEntry[],
+): Model
+Parameters
+modelManager: ModelManager
+url: string
+OptionalsavedFiles: CacheEntry[]
+Returns Model
+Defined in src/model-manager.ts:57
+files
+files: CacheEntry[]
+List of all shards in the cache, sorted by original URL (ascending order)
+
+Defined in src/model-manager.ts:89
+size
+size: number
+Size in bytes (total size of all shards).
+
+A value of -1 means the model is deleted from the cache. You must call ModelManager.downloadModel to re-download the model.
+
+Defined in src/model-manager.ts:85
+url
+url: string
+URL to the GGUF file (in case it contains multiple shards, the URL should point to the first shard)
+
+This URL will be used to identify the model in the cache. There can't be 2 models with the same URL.
+
+Defined in src/model-manager.ts:79
+open
+open(): Promise<Blob[]>
+Open and get a list of all shards as Blobs
+
+Returns Promise<Blob[]>
+Defined in src/model-manager.ts:93
+refresh
+refresh(options?: DownloadOptions): Promise<void>
+In case the model is invalid, call this function to re-download the model
+
+Parameters
+options: DownloadOptions = {}
+Returns Promise<void>
+Defined in src/model-manager.ts:139
+remove
+remove(): Promise<void>
+Remove the model from the cache
+
+Returns Promise<void>
+Defined in src/model-manager.ts:178
+validate
+validate(): ModelValidationStatus
+Validate the model files.
+
+If the model is invalid, the model manager will not be able to use it. You must call refresh to re-download the model.
+
+Cases that model is invalid:
+
+The model is deleted from the cache
+The model files are missing (or the download is interrupted)
+Returns ModelValidationStatus
+Defined in src/model-manager.ts:121
+
+
+=====================================================
+
+
+@wllama/wllamaModelManager
+Class ModelManager
+Defined in src/model-manager.ts:213
+Constructors
+C
+constructor
+Properties
+P
+cacheManager
+P
+logger
+P
+params
+Methods
+M
+clear
+M
+downloadModel
+M
+getModelOrDownload
+M
+getModels
+M
+parseModelUrl
+constructor
+new ModelManager(params?: ModelManagerParams): ModelManager
+Parameters
+params: ModelManagerParams = {}
+Returns ModelManager
+Defined in src/model-manager.ts:220
+cacheManager
+cacheManager: CacheManager
+Defined in src/model-manager.ts:215
+logger
+logger: WllamaLogger
+Defined in src/model-manager.ts:218
+params
+params: ModelManagerParams
+Defined in src/model-manager.ts:217
+clear
+clear(): Promise<void>
+Remove all models from the cache
+
+Returns Promise<void>
+Defined in src/model-manager.ts:316
+downloadModel
+downloadModel(url: string, options?: DownloadOptions): Promise<Model>
+Download a model from the given URL.
+
+The URL must end with .gguf
+
+Parameters
+url: string
+options: DownloadOptions = {}
+Returns Promise<Model>
+Defined in src/model-manager.ts:279
+getModelOrDownload
+getModelOrDownload(url: string, options?: DownloadOptions): Promise<Model>
+Get a model from the cache or download it if it's not available.
+
+Parameters
+url: string
+options: DownloadOptions = {}
+Returns Promise<Model>
+Defined in src/model-manager.ts:300
+getModels
+getModels(opts?: { includeInvalid?: boolean }): Promise<Model[]>
+Get all models in the cache
+
+Parameters
+opts: { includeInvalid?: boolean } = {}
+Returns Promise<Model[]>
+Defined in src/model-manager.ts:255
+Static
+parseModelUrl
+parseModelUrl(modelUrl: string | string[]): string[]
+Parses a model URL and returns an array of URLs based on the following patterns:
+
+If the input URL is an array, it returns the array itself.
+If the input URL is a string in the gguf-split format, it returns an array containing the URL of each shard in ascending order.
+Otherwise, it returns an array containing the input URL as a single element array.
+Parameters
+modelUrl: string | string[]
+URL or list of URLs
+
+Returns string[]
+Defined in src/model-manager.ts:233
+
+
+=====================================================
+
+
+@wllama/wllamaWllama
+Class Wllama
+Defined in src/wllama.ts:204
+Constructors
+C
+constructor
+Properties
+P
+cacheManager
+P
+modelManager
+Methods
+M
+_getDebugInfo
+M
+createChatCompletion
+M
+createCompletion
+M
+createEmbedding
+M
+decode
+M
+detokenize
+M
+embeddings
+M
+encode
+M
+exit
+M
+formatChat
+M
+getBOS
+M
+getChatTemplate
+M
+getDecoderStartToken
+M
+getEOS
+M
+getEOT
+M
+getLoadedContextInfo
+M
+getLogits
+M
+getModelMetadata
+M
+getVocab
+M
+isEncoderDecoderArchitecture
+M
+isModelLoaded
+M
+isMultithread
+M
+isTokenEOG
+M
+kvClear
+M
+kvRemove
+M
+loadModel
+M
+loadModelFromHF
+M
+loadModelFromUrl
+M
+lookupToken
+M
+mustAddBosToken
+M
+mustAddEosToken
+M
+samplingAccept
+M
+samplingInit
+M
+samplingSample
+M
+sessionLoad
+M
+sessionSave
+M
+setOptions
+M
+tokenize
+constructor
+new Wllama(pathConfig: AssetsPathConfig, wllamaConfig?: WllamaConfig): Wllama
+Parameters
+pathConfig: AssetsPathConfig
+wllamaConfig: WllamaConfig = {}
+Returns Wllama
+Defined in src/wllama.ts:229
+cacheManager
+cacheManager: CacheManager
+Defined in src/wllama.ts:206
+modelManager
+modelManager: ModelManager
+Defined in src/wllama.ts:207
+_getDebugInfo
+_getDebugInfo(): Promise<any>
+get debug info
+
+Returns Promise<any>
+Defined in src/wllama.ts:1063
+createChatCompletion
+createChatCompletion(
+    messages: WllamaChatMessage[],
+    options: ChatCompletionOptions,
+): Promise<string>
+Make completion for a given chat messages.
+
+NOTE: this function uses the chat template (if available) to format the chat messages. If the template is not available, it will use the default format (chatml). It can throw an error if the chat template is not compatible.
+
+Parameters
+messages: WllamaChatMessage[]
+Chat messages
+
+options: ChatCompletionOptions
+Returns Promise<string>
+Output completion text (only the completion part)
+
+Defined in src/wllama.ts:607
+createCompletion
+createCompletion(
+    prompt: string,
+    options: ChatCompletionOptions,
+): Promise<string>
+Make completion for a given text.
+
+Parameters
+prompt: string
+Input text
+
+options: ChatCompletionOptions
+Returns Promise<string>
+Output completion text (only the completion part)
+
+Defined in src/wllama.ts:621
+createEmbedding
+createEmbedding(
+    text: string,
+    options?: { skipBOS?: boolean; skipEOS?: boolean },
+): Promise<number[]>
+Calculate embedding vector for a given text. By default, BOS and EOS tokens will be added automatically. You can use the "skipBOS" and "skipEOS" option to disable it.
+
+Parameters
+text: string
+Input text
+
+options: { skipBOS?: boolean; skipEOS?: boolean } = {}
+Returns Promise<number[]>
+An embedding vector
+
+Defined in src/wllama.ts:572
+decode
+decode(
+    tokens: number[],
+    options: { skipLogits?: boolean },
+): Promise<{ nPast: number }>
+Run llama_decode()
+
+Parameters
+tokens: number[]
+A list of tokens to be decoded
+
+options: { skipLogits?: boolean }
+Returns Promise<{ nPast: number }>
+n_past (number of tokens so far in the sequence)
+
+Defined in src/wllama.ts:759
+detokenize
+detokenize(tokens: number[]): Promise<Uint8Array>
+Convert a list of tokens to text
+
+Parameters
+tokens: number[]
+Returns Promise<Uint8Array>
+Uint8Array, which maybe an unfinished unicode
+
+Defined in src/wllama.ts:747
+embeddings
+embeddings(tokens: number[]): Promise<number[]>
+Calculate embeddings for a given list of tokens. Output vector is always normalized
+
+Parameters
+tokens: number[]
+Returns Promise<number[]>
+A list of number represents an embedding vector of N dimensions
+
+Defined in src/wllama.ts:910
+encode
+encode(
+    tokens: number[],
+    options?: Record<never, never>,
+): Promise<{ nPast: number }>
+Run llama_encode()
+
+Parameters
+tokens: number[]
+A list of tokens to be encoded
+
+Optionaloptions: Record<never, never>
+Unused for now
+
+Returns Promise<{ nPast: number }>
+n_past (number of tokens so far in the sequence)
+
+Defined in src/wllama.ts:811
+exit
+exit(): Promise<void>
+Unload the model and free all memory.
+
+Note: This function will NOT crash if model is not yet loaded
+
+Returns Promise<void>
+Defined in src/wllama.ts:1055
+formatChat
+formatChat(
+    messages: WllamaChatMessage[],
+    addAssistant: boolean,
+    template?: string,
+): Promise<string>
+Apply chat template to a list of messages
+
+Parameters
+messages: WllamaChatMessage[]
+list of messages
+
+addAssistant: boolean
+whether to add assistant prompt at the end
+
+Optionaltemplate: string
+(optional) custom template, see llama-server --chat-template argument for more details
+
+Returns Promise<string>
+formatted chat
+
+Defined in src/wllama.ts:1022
+getBOS
+getBOS(): number
+Get token ID associated to BOS (begin of sentence) token.
+
+NOTE: This can only being used after loadModel is called.
+
+Returns number
+-1 if the model is not loaded.
+
+Defined in src/wllama.ts:272
+getChatTemplate
+getChatTemplate(): null | string
+Get the jinja chat template comes with the model. It only available if the original model (before converting to gguf) has the template in tokenizer_config.json
+
+NOTE: This can only being used after loadModel is called.
+
+Returns null | string
+the jinja template. null if there is no template in gguf
+
+Defined in src/wllama.ts:390
+getDecoderStartToken
+getDecoderStartToken(): number
+Get token ID associated to token used by decoder, to start generating output sequence(only usable for encoder-decoder architecture). In other words, encoder uses normal BOS and decoder uses this token.
+
+NOTE: This can only being used after loadModel is called.
+
+Returns number
+-1 if the model is not loaded.
+
+Defined in src/wllama.ts:319
+getEOS
+getEOS(): number
+Get token ID associated to EOS (end of sentence) token.
+
+NOTE: This can only being used after loadModel is called.
+
+Returns number
+-1 if the model is not loaded.
+
+Defined in src/wllama.ts:283
+getEOT
+getEOT(): number
+Get token ID associated to EOT (end of turn) token.
+
+NOTE: This can only being used after loadModel is called.
+
+Returns number
+-1 if the model is not loaded.
+
+Defined in src/wllama.ts:294
+getLoadedContextInfo
+getLoadedContextInfo(): LoadedContextInfo
+Returns LoadedContextInfo
+Defined in src/wllama.ts:554
+getLogits
+getLogits(topK?: number): Promise<{ p: number; token: number }[]>
+Get softmax-ed probability of logits, can be used for custom sampling
+
+Parameters
+topK: number = 40
+Get top K tokens having highest logits value. If topK == -1, we return all n_vocab logits, but this is not recommended because it's slow.
+
+Returns Promise<{ p: number; token: number }[]>
+Defined in src/wllama.ts:898
+getModelMetadata
+getModelMetadata(): ModelMetadata
+Get model hyper-parameters and metadata
+
+NOTE: This can only being used after loadModel is called.
+
+Returns ModelMetadata
+ModelMetadata
+
+Defined in src/wllama.ts:330
+getVocab
+getVocab(): Promise<Uint8Array[]>
+Get a list of pieces in vocab. NOTE: This function is slow, should only be used once.
+
+Returns Promise<Uint8Array[]>
+A list of Uint8Array. The nth element in the list associated to nth token in vocab
+
+Defined in src/wllama.ts:705
+isEncoderDecoderArchitecture
+isEncoderDecoderArchitecture(): boolean
+Check if the current model uses encoder-decoder architecture
+
+NOTE: This can only being used after loadModel is called.
+
+Returns boolean
+true if multi-thread is used.
+
+Defined in src/wllama.ts:354
+isModelLoaded
+isModelLoaded(): boolean
+Check if the model is loaded via loadModel()
+
+Returns boolean
+Defined in src/wllama.ts:261
+isMultithread
+isMultithread(): boolean
+Check if we're currently using multi-thread build.
+
+NOTE: This can only being used after loadModel is called.
+
+Returns boolean
+true if multi-thread is used.
+
+Defined in src/wllama.ts:342
+isTokenEOG
+isTokenEOG(token: number): boolean
+Check if a given token is end-of-generation token (e.g. EOS, EOT, etc.)
+
+Parameters
+token: number
+the token ID to be checked
+
+Returns boolean
+true if the token is EOS, EOT, or any other end-of-generation tokens
+
+Defined in src/wllama.ts:304
+kvClear
+kvClear(): Promise<void>
+Clear all tokens in KV cache
+
+Returns Promise<void>
+Defined in src/wllama.ts:972
+kvRemove
+kvRemove(nKeep: number, nDiscard: number): Promise<void>
+Remove and shift some tokens from KV cache. Keep n_keep, remove n_discard then shift the rest
+
+Parameters
+nKeep: number
+nDiscard: number
+Returns Promise<void>
+Defined in src/wllama.ts:957
+loadModel
+loadModel(
+    ggufBlobsOrModel: Blob[] | Model,
+    config?: LoadModelConfig,
+): Promise<void>
+Load model from a given list of Blob.
+
+You can pass multiple buffers into the function (in case the model contains multiple shards).
+
+Parameters
+ggufBlobsOrModel: Blob[] | Model
+Can be either list of Blobs (in case you use local file), or a Model object (in case you use ModelManager)
+
+config: LoadModelConfig = {}
+LoadModelConfig
+
+Returns Promise<void>
+Defined in src/wllama.ts:447
+loadModelFromHF
+loadModelFromHF(
+    modelId: string,
+    filePath: string,
+    config?: LoadModelConfig & DownloadOptions & { useCache?: boolean },
+): Promise<void>
+Load model from a given Hugging Face model ID and file path.
+
+Parameters
+modelId: string
+The HF model ID, for example: 'ggml-org/models'
+
+filePath: string
+The GGUF file path, for example: 'tinyllamas/stories15M-q4_0.gguf'
+
+config: LoadModelConfig & DownloadOptions & { useCache?: boolean } = {}
+Returns Promise<void>
+Defined in src/wllama.ts:422
+loadModelFromUrl
+loadModelFromUrl(
+    modelUrl: string | string[],
+    config?: LoadModelConfig & DownloadOptions & { useCache?: boolean },
+): Promise<void>
+Load model from a given URL (or a list of URLs, in case the model is splitted into smaller files)
+
+If the model already been downloaded (via downloadModel()), then we will use the cached model
+Else, we download the model from internet
+Parameters
+modelUrl: string | string[]
+URL to the GGUF file. If the model is splitted, pass the URL to the first shard.
+
+config: LoadModelConfig & DownloadOptions & { useCache?: boolean } = {}
+Returns Promise<void>
+Defined in src/wllama.ts:402
+lookupToken
+lookupToken(piece: string): Promise<number>
+Lookup to see if a token exist in vocab or not. Useful for searching special tokens like "<|im_start|>" NOTE: It will match the whole token, so do not use it as a replacement for tokenize()
+
+Parameters
+piece: string
+Returns Promise<number>
+Token ID associated to the given piece. Returns -1 if cannot find the token.
+
+Defined in src/wllama.ts:717
+mustAddBosToken
+mustAddBosToken(): boolean
+Must we add BOS token to the tokenized sequence?
+
+NOTE: This can only being used after loadModel is called.
+
+Returns boolean
+true if BOS token must be added to the sequence
+
+Defined in src/wllama.ts:366
+mustAddEosToken
+mustAddEosToken(): boolean
+Must we add EOS token to the tokenized sequence?
+
+NOTE: This can only being used after loadModel is called.
+
+Returns boolean
+true if EOS token must be added to the sequence
+
+Defined in src/wllama.ts:378
+samplingAccept
+samplingAccept(tokens: number[]): Promise<void>
+Accept and save a new token to ctx_sampling
+
+Parameters
+tokens: number[]
+Returns Promise<void>
+Defined in src/wllama.ts:886
+samplingInit
+samplingInit(config: SamplingConfig, pastTokens?: number[]): Promise<void>
+Create or reset the ctx_sampling
+
+Parameters
+config: SamplingConfig
+pastTokens: number[] = []
+In case re-initializing the ctx_sampling, you can re-import past tokens into the new context
+
+Returns Promise<void>
+Defined in src/wllama.ts:685
+samplingSample
+samplingSample(): Promise<{ piece: Uint8Array; token: number }>
+Sample a new token (remember to samplingInit() at least once before calling this function)
+
+Returns Promise<{ piece: Uint8Array; token: number }>
+the token ID and its detokenized value (which maybe an unfinished unicode)
+
+Defined in src/wllama.ts:873
+sessionLoad
+sessionLoad(filePath: string): Promise<void>
+Load session from file (virtual file system) TODO: add ability to download the file
+
+Parameters
+filePath: string
+Returns Promise<void>
+Defined in src/wllama.ts:1000
+sessionSave
+sessionSave(filePath: string): Promise<{ tokens: number[] }>
+Save session to file (virtual file system) TODO: add ability to download the file
+
+Parameters
+filePath: string
+Returns Promise<{ tokens: number[] }>
+List of tokens saved to the file
+
+Defined in src/wllama.ts:987
+setOptions
+setOptions(opt: ContextOptions): Promise<void>
+Set options for underlaying llama_context
+
+Parameters
+opt: ContextOptions
+Returns Promise<void>
+Defined in src/wllama.ts:1044
+tokenize
+tokenize(text: string, special?: boolean): Promise<number[]>
+Convert a given text to list of tokens
+
+Parameters
+text: string
+special: boolean = true
+Should split special tokens?
+
+Returns Promise<number[]>
+List of token ID
+
+Defined in src/wllama.ts:733
+
+
+=====================================================
+
+
+@wllama/wllamaWllamaError
+Class WllamaError
+Hierarchy
+Error
+WllamaError
+Defined in src/wllama.ts:196
+Constructors
+C
+constructor
+Properties
+P
+type
+constructor
+new WllamaError(message: string, type?: WllamaErrorType): WllamaError
+Parameters
+message: string
+type: WllamaErrorType = 'unknown_error'
+Returns WllamaError
+Overrides Error.constructor
+
+Defined in src/wllama.ts:198
+type
+type: WllamaErrorType
+Defined in src/wllama.ts:197
+
+
+=====================================================
+
+
+@wllama/wllamaAssetsPathConfig
+Interface AssetsPathConfig
+interface AssetsPathConfig {
+    "multi-thread/wllama.wasm"?: string;
+    "single-thread/wllama.wasm": string;
+}
+Defined in src/wllama.ts:63
+Properties
+P
+multi-thread/wllama.wasm?
+P
+single-thread/wllama.wasm
+Optional
+multi-thread/wllama.wasm
+"multi-thread/wllama.wasm"?: string
+Defined in src/wllama.ts:65
+single-thread/wllama.wasm
+"single-thread/wllama.wasm": string
+Defined in src/wllama.ts:64
+
+
+=====================================================
+
+
+@wllama/wllamaCacheEntry
+Interface CacheEntry
+interface CacheEntry {
+    metadata: CacheEntryMetadata;
+    name: string;
+    size: number;
+}
+Defined in src/cache-manager.ts:25
+Properties
+P
+metadata
+P
+name
+P
+size
+metadata
+metadata: CacheEntryMetadata
+Other metadata
+
+Defined in src/cache-manager.ts:37
+name
+name: string
+File name in OPFS, in the format: ${hashSHA1(fullURL)}_${fileName}
+
+Defined in src/cache-manager.ts:29
+size
+size: number
+Size of file (in bytes)
+
+Defined in src/cache-manager.ts:33
+P
+metadata
+P
+name
+P
+size
+@wllama/wllama
+ModelValidationStatus
+Model
+ModelManager
+Wllama
+WllamaError
+AssetsPathConfig
+CacheEntry
+CacheEntryMetadata
+ChatCompletionOptions
+ContextOptions
+LoadedContextInfo
+LoadModelConfig
+ModelManagerParams
+ModelMetadata
+SamplingConfig
+WllamaChatMessage
+WllamaConfig
+WllamaLogger
+DownloadOptions
+DownloadProgressCallback
+WllamaErrorType
+LoggerWithoutDebug
+POLYFILL_ETAG
+
+
+
+=====================================================
+
+
+@wllama/wllamaCacheEntryMetadata
+Interface CacheEntryMetadata
+interface CacheEntryMetadata {
+    etag: string;
+    originalSize: number;
+    originalURL: string;
+}
+Defined in src/cache-manager.ts:40
+Properties
+P
+etag
+P
+originalSize
+P
+originalURL
+etag
+etag: string
+ETag header from remote request https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+
+Defined in src/cache-manager.ts:45
+originalSize
+originalSize: number
+Remote file size (in bytes), used for integrity check
+
+Defined in src/cache-manager.ts:49
+originalURL
+originalURL: string
+Original URL of the remote model. Unused for now
+
+Defined in src/cache-manager.ts:53
+
+
+=====================================================
+
+
+@wllama/wllamaChatCompletionOptions
+Interface ChatCompletionOptions
+interface ChatCompletionOptions {
+    nPredict?: number;
+    sampling?: SamplingConfig;
+    stopTokens?: number[];
+    useCache?: boolean;
+    onNewToken(
+        token: number,
+        piece: Uint8Array,
+        currentText: string,
+        optionals: { abortSignal: () => any },
+    ): any;
+}
+Defined in src/wllama.ts:121
+Properties
+P
+nPredict?
+P
+sampling?
+P
+stopTokens?
+P
+useCache?
+Methods
+M
+onNewToken?
+Optional
+nPredict
+nPredict?: number
+Defined in src/wllama.ts:122
+Optional
+sampling
+sampling?: SamplingConfig
+Defined in src/wllama.ts:131
+Optional
+stopTokens
+stopTokens?: number[]
+List of custom token IDs for stopping the generation. Note: To convert from text to token ID, use lookupToken()
+
+Defined in src/wllama.ts:136
+Optional
+useCache
+useCache?: boolean
+Equivalent to cache_prompt option in llama.cpp server. Useful for chat, because it skip evaluating the history part of the conversation.
+
+Defined in src/wllama.ts:141
+Optional
+onNewToken
+onNewToken(
+    token: number,
+    piece: Uint8Array,
+    currentText: string,
+    optionals: { abortSignal: () => any },
+): any
+Parameters
+token: number
+piece: Uint8Array
+currentText: string
+optionals: { abortSignal: () => any }
+Returns any
+Defined in src/wllama.ts:123
+
+
+=====================================================
+
+
+@wllama/wllamaContextOptions
+Interface ContextOptions
+interface ContextOptions {
+    embeddings: boolean;
+}
+Defined in src/wllama.ts:154
+Properties
+P
+embeddings
+embeddings
+embeddings: boolean
+Allow switching between embeddings / generation mode. Useful for models like GritLM.
+
+Defined in src/wllama.ts:158
+
+
+=====================================================
+
+
+@wllama/wllamaLoadedContextInfo
+Interface LoadedContextInfo
+interface LoadedContextInfo {
+    add_bos_token: boolean;
+    add_eos_token: boolean;
+    has_encoder: boolean;
+    list_tokens_eog: number[];
+    metadata: Record<string, string>;
+    n_batch: number;
+    n_ctx: number;
+    n_ctx_train: number;
+    n_embd: number;
+    n_layer: number;
+    n_ubatch: number;
+    n_vocab: number;
+    token_bos: number;
+    token_decoder_start: number;
+    token_eos: number;
+    token_eot: number;
+}
+Defined in src/wllama.ts:161
+Properties
+P
+add_bos_token
+P
+add_eos_token
+P
+has_encoder
+P
+list_tokens_eog
+P
+metadata
+P
+n_batch
+P
+n_ctx
+P
+n_ctx_train
+P
+n_embd
+P
+n_layer
+P
+n_ubatch
+P
+n_vocab
+P
+token_bos
+P
+token_decoder_start
+P
+token_eos
+P
+token_eot
+add_bos_token
+add_bos_token: boolean
+Defined in src/wllama.ts:176
+add_eos_token
+add_eos_token: boolean
+Defined in src/wllama.ts:177
+has_encoder
+has_encoder: boolean
+Defined in src/wllama.ts:174
+list_tokens_eog
+list_tokens_eog: number[]
+Defined in src/wllama.ts:173
+metadata
+metadata: Record<string, string>
+Defined in src/wllama.ts:169
+n_batch
+n_batch: number
+Defined in src/wllama.ts:164
+n_ctx
+n_ctx: number
+Defined in src/wllama.ts:163
+n_ctx_train
+n_ctx_train: number
+Defined in src/wllama.ts:166
+n_embd
+n_embd: number
+Defined in src/wllama.ts:167
+n_layer
+n_layer: number
+Defined in src/wllama.ts:168
+n_ubatch
+n_ubatch: number
+Defined in src/wllama.ts:165
+n_vocab
+n_vocab: number
+Defined in src/wllama.ts:162
+token_bos
+token_bos: number
+Defined in src/wllama.ts:170
+token_decoder_start
+token_decoder_start: number
+Defined in src/wllama.ts:175
+token_eos
+token_eos: number
+Defined in src/wllama.ts:171
+token_eot
+token_eot: number
+Defined in src/wllama.ts:172
+
+
+=====================================================
+
+
+@wllama/wllamaLoadModelConfig
+Interface LoadModelConfig
+interface LoadModelConfig {
+    cache_type_k?:
+        | "f32"
+        | "f16"
+        | "q8_0"
+        | "q5_1"
+        | "q5_0"
+        | "q4_1"
+        | "q4_0";
+    cache_type_v?: "f32"
+    | "f16"
+    | "q8_0"
+    | "q5_1"
+    | "q5_0"
+    | "q4_1"
+    | "q4_0";
+    embeddings?: boolean;
+    n_batch?: number;
+    n_ctx?: number;
+    n_threads?: number;
+    offload_kqv?: boolean;
+    pooling_type?:
+        | "LLAMA_POOLING_TYPE_UNSPECIFIED"
+        | "LLAMA_POOLING_TYPE_NONE"
+        | "LLAMA_POOLING_TYPE_MEAN"
+        | "LLAMA_POOLING_TYPE_CLS";
+    rope_freq_base?: number;
+    rope_freq_scale?: number;
+    rope_scaling_type?: | "LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED"
+    | "LLAMA_ROPE_SCALING_TYPE_NONE"
+    | "LLAMA_ROPE_SCALING_TYPE_LINEAR"
+    | "LLAMA_ROPE_SCALING_TYPE_YARN";
+    seed?: number;
+    yarn_attn_factor?: number;
+    yarn_beta_fast?: number;
+    yarn_beta_slow?: number;
+    yarn_ext_factor?: number;
+    yarn_orig_ctx?: number;
+}
+Defined in src/wllama.ts:68
+Properties
+P
+cache_type_k?
+P
+cache_type_v?
+P
+embeddings?
+P
+n_batch?
+P
+n_ctx?
+P
+n_threads?
+P
+offload_kqv?
+P
+pooling_type?
+P
+rope_freq_base?
+P
+rope_freq_scale?
+P
+rope_scaling_type?
+P
+seed?
+P
+yarn_attn_factor?
+P
+yarn_beta_fast?
+P
+yarn_beta_slow?
+P
+yarn_ext_factor?
+P
+yarn_orig_ctx?
+Optional
+cache_type_k
+cache_type_k?: "f32" | "f16" | "q8_0" | "q5_1" | "q5_0" | "q4_1" | "q4_0"
+Defined in src/wllama.ts:96
+Optional
+cache_type_v
+cache_type_v?: "f32" | "f16" | "q8_0" | "q5_1" | "q5_0" | "q4_1" | "q4_0"
+Defined in src/wllama.ts:97
+Optional
+embeddings
+embeddings?: boolean
+Defined in src/wllama.ts:74
+Optional
+n_batch
+n_batch?: number
+Defined in src/wllama.ts:71
+Optional
+n_ctx
+n_ctx?: number
+Defined in src/wllama.ts:70
+Optional
+n_threads
+n_threads?: number
+Defined in src/wllama.ts:73
+Optional
+offload_kqv
+offload_kqv?: boolean
+Defined in src/wllama.ts:75
+Optional
+pooling_type
+pooling_type?:
+    | "LLAMA_POOLING_TYPE_UNSPECIFIED"
+    | "LLAMA_POOLING_TYPE_NONE"
+    | "LLAMA_POOLING_TYPE_MEAN"
+    | "LLAMA_POOLING_TYPE_CLS"
+Defined in src/wllama.ts:76
+Optional
+rope_freq_base
+rope_freq_base?: number
+Defined in src/wllama.ts:87
+Optional
+rope_freq_scale
+rope_freq_scale?: number
+Defined in src/wllama.ts:88
+Optional
+rope_scaling_type
+rope_scaling_type?:
+    | "LLAMA_ROPE_SCALING_TYPE_UNSPECIFIED"
+    | "LLAMA_ROPE_SCALING_TYPE_NONE"
+    | "LLAMA_ROPE_SCALING_TYPE_LINEAR"
+    | "LLAMA_ROPE_SCALING_TYPE_YARN"
+Defined in src/wllama.ts:82
+Optional
+seed
+seed?: number
+Defined in src/wllama.ts:69
+Optional
+yarn_attn_factor
+yarn_attn_factor?: number
+Defined in src/wllama.ts:90
+Optional
+yarn_beta_fast
+yarn_beta_fast?: number
+Defined in src/wllama.ts:91
+Optional
+yarn_beta_slow
+yarn_beta_slow?: number
+Defined in src/wllama.ts:92
+Optional
+yarn_ext_factor
+yarn_ext_factor?: number
+Defined in src/wllama.ts:89
+Optional
+yarn_orig_ctx
+yarn_orig_ctx?: number
+Defined in src/wllama.ts:93
+
+
+=====================================================
+
+
+@wllama/wllamaModelManagerParams
+Interface ModelManagerParams
+Parameters for ModelManager constructor
+
+interface ModelManagerParams {
+    allowOffline?: boolean;
+    cacheManager?: CacheManager;
+    logger?: WllamaLogger;
+    parallelDownloads?: number;
+}
+Defined in src/model-manager.ts:33
+Properties
+P
+allowOffline?
+P
+cacheManager?
+P
+logger?
+P
+parallelDownloads?
+Optional
+allowOffline
+allowOffline?: boolean
+Allow offline mode
+
+Default: false
+
+Defined in src/model-manager.ts:47
+Optional
+cacheManager
+cacheManager?: CacheManager
+Defined in src/model-manager.ts:34
+Optional
+logger
+logger?: WllamaLogger
+Defined in src/model-manager.ts:35
+Optional
+parallelDownloads
+parallelDownloads?: number
+Number of parallel downloads
+
+Default: 3
+
+Defined in src/model-manager.ts:41
+
+
+=====================================================
+
+
+@wllama/wllamaModelMetadata
+Interface ModelMetadata
+interface ModelMetadata {
+    hparams: {
+        nCtxTrain: number;
+        nEmbd: number;
+        nLayer: number;
+        nVocab: number;
+    };
+    meta: Record<string, string>;
+}
+Defined in src/wllama.ts:144
+Properties
+P
+hparams
+P
+meta
+hparams
+hparams: { nCtxTrain: number; nEmbd: number; nLayer: number; nVocab: number }
+Defined in src/wllama.ts:145
+meta
+meta: Record<string, string>
+Defined in src/wllama.ts:151
+
+
+=====================================================
+
+
+@wllama/wllamaSamplingConfig
+Interface SamplingConfig
+interface SamplingConfig {
+    dynatemp_exponent?: number;
+    dynatemp_range?: number;
+    grammar?: string;
+    logit_bias?: { bias: number; token: number }[];
+    min_p?: number;
+    mirostat?: number;
+    mirostat_tau?: number;
+    n_prev?: number;
+    n_probs?: number;
+    penalty_freq?: number;
+    penalty_last_n?: number;
+    penalty_present?: number;
+    penalty_repeat?: number;
+    temp?: number;
+    top_k?: number;
+    top_p?: number;
+    typical_p?: number;
+}
+Defined in src/wllama.ts:100
+Properties
+P
+dynatemp_exponent?
+P
+dynatemp_range?
+P
+grammar?
+P
+logit_bias?
+P
+min_p?
+P
+mirostat?
+P
+mirostat_tau?
+P
+n_prev?
+P
+n_probs?
+P
+penalty_freq?
+P
+penalty_last_n?
+P
+penalty_present?
+P
+penalty_repeat?
+P
+temp?
+P
+top_k?
+P
+top_p?
+P
+typical_p?
+Optional
+dynatemp_exponent
+dynatemp_exponent?: number
+Defined in src/wllama.ts:112
+Optional
+dynatemp_range
+dynatemp_range?: number
+Defined in src/wllama.ts:111
+Optional
+grammar
+grammar?: string
+Defined in src/wllama.ts:113
+Optional
+logit_bias
+logit_bias?: { bias: number; token: number }[]
+Defined in src/wllama.ts:118
+Optional
+min_p
+min_p?: number
+Defined in src/wllama.ts:116
+Optional
+mirostat
+mirostat?: number
+Defined in src/wllama.ts:102
+Optional
+mirostat_tau
+mirostat_tau?: number
+Defined in src/wllama.ts:103
+Optional
+n_prev
+n_prev?: number
+Defined in src/wllama.ts:114
+Optional
+n_probs
+n_probs?: number
+Defined in src/wllama.ts:115
+Optional
+penalty_freq
+penalty_freq?: number
+Defined in src/wllama.ts:109
+Optional
+penalty_last_n
+penalty_last_n?: number
+Defined in src/wllama.ts:107
+Optional
+penalty_present
+penalty_present?: number
+Defined in src/wllama.ts:110
+Optional
+penalty_repeat
+penalty_repeat?: number
+Defined in src/wllama.ts:108
+Optional
+temp
+temp?: number
+Defined in src/wllama.ts:104
+Optional
+top_k
+top_k?: number
+Defined in src/wllama.ts:106
+Optional
+top_p
+top_p?: number
+Defined in src/wllama.ts:105
+Optional
+typical_p
+typical_p?: number
+Defined in src/wllama.ts:117
+
+
+=====================================================
+
+
+@wllama/wllamaWllamaChatMessage
+Interface WllamaChatMessage
+interface WllamaChatMessage {
+    content: string;
+    role: "system" | "user" | "assistant";
+}
+Defined in src/wllama.ts:58
+Properties
+P
+content
+P
+role
+content
+content: string
+Defined in src/wllama.ts:60
+role
+role: "system" | "user" | "assistant"
+Defined in src/wllama.ts:59
+
+
+=====================================================
+
+
+@wllama/wllamaWllamaConfig
+Interface WllamaConfig
+interface WllamaConfig {
+    allowOffline?: boolean;
+    cacheManager?: CacheManager;
+    logger?: WllamaLogger;
+    modelManager?: ModelManager;
+    parallelDownloads?: number;
+    suppressNativeLog?: boolean;
+}
+Defined in src/wllama.ts:27
+Properties
+P
+allowOffline?
+P
+cacheManager?
+P
+logger?
+P
+modelManager?
+P
+parallelDownloads?
+P
+suppressNativeLog?
+Optional
+allowOffline
+allowOffline?: boolean
+Allow offline mode. If true, the model will be loaded from cache if it's available.
+
+Default: allowOffline = false
+
+Defined in src/wllama.ts:47
+Optional
+cacheManager
+cacheManager?: CacheManager
+Custom cache manager (only for advanced usage)
+
+Defined in src/wllama.ts:51
+Optional
+logger
+logger?: WllamaLogger
+Custom logger functions
+
+Defined in src/wllama.ts:35
+Optional
+modelManager
+modelManager?: ModelManager
+Custom model manager (only for advanced usage)
+
+Defined in src/wllama.ts:55
+Optional
+parallelDownloads
+parallelDownloads?: number
+Maximum number of parallel files to be downloaded
+
+Default: parallelDownloads = 3
+
+Defined in src/wllama.ts:41
+Optional
+suppressNativeLog
+suppressNativeLog?: boolean
+If true, suppress all log messages from native CPP code
+
+Defined in src/wllama.ts:31
+
+
+=====================================================
+
+
+@wllama/wllamaWllamaLogger
+Interface WllamaLogger
+interface WllamaLogger {
+    debug: {
+        (...data: any[]): void;
+        (message?: any, ...optionalParams: any[]): void;
+    };
+    error: {
+        (...data: any[]): void;
+        (message?: any, ...optionalParams: any[]): void;
+    };
+    log: {
+        (...data: any[]): void;
+        (message?: any, ...optionalParams: any[]): void;
+    };
+    warn: {
+        (...data: any[]): void;
+        (message?: any, ...optionalParams: any[]): void;
+    };
+}
+Defined in src/wllama.ts:19
+Properties
+P
+debug
+P
+error
+P
+log
+P
+warn
+debug
+debug: {
+    (...data: any[]): void;
+    (message?: any, ...optionalParams: any[]): void;
+}
+Type declaration
+(...data: any[]): void
+MDN Reference
+
+Parameters
+...data: any[]
+Returns void
+(message?: any, ...optionalParams: any[]): void
+The console.debug() function is an alias for log.
+
+Parameters
+Optionalmessage: any
+...optionalParams: any[]
+Returns void
+Since
+v8.0.0
+
+Defined in src/wllama.ts:20
+error
+error: {
+    (...data: any[]): void;
+    (message?: any, ...optionalParams: any[]): void;
+}
+Type declaration
+(...data: any[]): void
+MDN Reference
+
+Parameters
+...data: any[]
+Returns void
+(message?: any, ...optionalParams: any[]): void
+Prints to stderr with newline. Multiple arguments can be passed, with the first used as the primary message and all additional used as substitution values similar to printf(3) (the arguments are all passed to util.format()).
+
+const code = 5;
+console.error('error #%d', code);
+// Prints: error #5, to stderr
+console.error('error', code);
+// Prints: error 5, to stderr
+Copy
+If formatting elements (e.g. %d) are not found in the first string then util.inspect() is called on each argument and the resulting string values are concatenated. See util.format() for more information.
+
+Parameters
+Optionalmessage: any
+...optionalParams: any[]
+Returns void
+Since
+v0.1.100
+
+Defined in src/wllama.ts:23
+log
+log: { (...data: any[]): void; (message?: any, ...optionalParams: any[]): void }
+Type declaration
+(...data: any[]): void
+MDN Reference
+
+Parameters
+...data: any[]
+Returns void
+(message?: any, ...optionalParams: any[]): void
+Prints to stdout with newline. Multiple arguments can be passed, with the first used as the primary message and all additional used as substitution values similar to printf(3) (the arguments are all passed to util.format()).
+
+const count = 5;
+console.log('count: %d', count);
+// Prints: count: 5, to stdout
+console.log('count:', count);
+// Prints: count: 5, to stdout
+Copy
+See util.format() for more information.
+
+Parameters
+Optionalmessage: any
+...optionalParams: any[]
+Returns void
+Since
+v0.1.100
+
+Defined in src/wllama.ts:21
+warn
+warn: {
+    (...data: any[]): void;
+    (message?: any, ...optionalParams: any[]): void;
+}
+Type declaration
+(...data: any[]): void
+MDN Reference
+
+Parameters
+...data: any[]
+Returns void
+(message?: any, ...optionalParams: any[]): void
+The console.warn() function is an alias for error.
+
+Parameters
+Optionalmessage: any
+...optionalParams: any[]
+Returns void
+Since
+v0.1.100
+
+Defined in src/wllama.ts:22
+
+
+=====================================================
+
+
+@wllama/wllamaDownloadOptions
+Type Alias DownloadOptions
+DownloadOptions: {
+    headers?: Record<string, string>;
+    progressCallback?: DownloadProgressCallback;
+    signal?: AbortSignal;
+}
+Type declaration
+Optionalheaders?: Record<string, string>
+Custom headers for the request. Useful for authentication (e.g. Bearer token)
+
+OptionalprogressCallback?: DownloadProgressCallback
+Callback function to track download progress
+
+Optionalsignal?: AbortSignal
+Abort signal for the request
+
+Defined in src/cache-manager.ts:7
+
+
+=====================================================
+
+
+@wllama/wllamaDownloadProgressCallback
+Type Alias DownloadProgressCallback
+DownloadProgressCallback: (opts: { loaded: number; total: number }) => any
+Callback function to track download progress
+
+Defined in src/model-manager.ts:10
+
+
+=====================================================
+
+
+@wllama/wllamaWllamaErrorType
+Type Alias WllamaErrorType
+WllamaErrorType:
+    | "model_not_loaded"
+    | "download_error"
+    | "load_error"
+    | "kv_cache_full"
+    | "unknown_error"
+    | "inference_error"
+Defined in src/wllama.ts:188
+
+
+=====================================================
+
+
+@wllama/wllamaLoggerWithoutDebug
+Variable LoggerWithoutDebugConst
+LoggerWithoutDebug: {
+    Console: ConsoleConstructor;
+    debug: () => void;
+    assert(condition?: boolean, ...data: any[]): void;
+    assert(value: any, message?: string, ...optionalParams: any[]): void;
+    clear(): void;
+    clear(): void;
+    count(label?: string): void;
+    count(label?: string): void;
+    countReset(label?: string): void;
+    countReset(label?: string): void;
+    dir(item?: any, options?: any): void;
+    dir(obj: any, options?: InspectOptions): void;
+    dirxml(...data: any[]): void;
+    dirxml(...data: any[]): void;
+    error(...data: any[]): void;
+    error(message?: any, ...optionalParams: any[]): void;
+    group(...data: any[]): void;
+    group(...label: any[]): void;
+    groupCollapsed(...data: any[]): void;
+    groupCollapsed(...label: any[]): void;
+    groupEnd(): void;
+    groupEnd(): void;
+    info(...data: any[]): void;
+    info(message?: any, ...optionalParams: any[]): void;
+    log(...data: any[]): void;
+    log(message?: any, ...optionalParams: any[]): void;
+    profile(label?: string): void;
+    profileEnd(label?: string): void;
+    table(tabularData?: any, properties?: string[]): void;
+    table(tabularData: any, properties?: readonly string[]): void;
+    time(label?: string): void;
+    time(label?: string): void;
+    timeEnd(label?: string): void;
+    timeEnd(label?: string): void;
+    timeLog(label?: string, ...data: any[]): void;
+    timeLog(label?: string, ...data: any[]): void;
+    timeStamp(label?: string): void;
+    timeStamp(label?: string): void;
+    trace(...data: any[]): void;
+    trace(message?: any, ...optionalParams: any[]): void;
+    warn(...data: any[]): void;
+    warn(message?: any, ...optionalParams: any[]): void;
+} = ...
+Logger preset with debug messages suppressed
+
+Type declaration
+Console: ConsoleConstructor
+debug: () => void
+assert:function
+clear:function
+count:function
+countReset:function
+dir:function
+dirxml:function
+error:function
+group:function
+groupCollapsed:function
+groupEnd:function
+info:function
+log:function
+profile:function
+profileEnd:function
+table:function
+time:function
+timeEnd:function
+timeLog:function
+timeStamp:function
+trace:function
+warn:function
+Defined in src/wllama.ts:183
+
+
+=====================================================
+
+
+@wllama/wllamaPOLYFILL_ETAG
+Variable POLYFILL_ETAGConst
+POLYFILL_ETAG: "polyfill_for_older_version" = 'polyfill_for_older_version'
+Defined in src/cache-manager.ts:23
+
+
+=====================================================
+
+
+END OF OFFICIAL DOCS
+
+
+=====================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=====================================================
+
+
+NOTES OF INTEREST FROM THE BUILD PROCESS USING CURSOR AI AND CLAUDE SONNET
+These notes should be helpful when setting up a new wllama project.
+
+NOTES BELOW
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+I'll explain what's happening with the error and then provide a step-by-step guide of what we did.
+
+**Error Explanation:**
+The error `SharedArrayBuffer is not defined` occurs because the application requires `SharedArrayBuffer` support, which is a JavaScript feature used for parallel processing and shared memory between threads. This feature is disabled by default in most browsers for security reasons (to prevent Spectre-like attacks). To enable it, the web server needs to send specific security headers.
+
+Now, here's the complete step-by-step guide of what we did:
+
+1. **Clone the Repository**
+```bash
+git clone https://github.com/pbosh/wllama.git
+cd wllama
+```
+
+2. **Install Dependencies**
+```bash
+npm install
+```
+
+3. **Build WebAssembly Component**
+```bash
+npm run build:wasm
+```
+This step used Docker to compile the C++ code to WebAssembly.
+
+4. **Fix Directory Structure**
+```bash
+# Remove incorrect single-thread file and create directory
+rm src/single-thread
+mkdir -p src/single-thread
+
+# Copy WebAssembly files to single-thread directory
+cp src/multi-thread/wllama.js src/multi-thread/wllama.wasm src/single-thread/
+```
+
+5. **Build TypeScript Components**
+```bash
+npm run build
+```
+This step:
+- Cleaned previous build files
+- Built worker scripts
+- Compiled TypeScript code
+- Generated documentation
+
+6. **Start HTTP Server**
+```bash
+python3 -m http.server 8080
+```
+
+The error we're seeing suggests that to make this work properly, we need to serve the content with specific HTTP headers:
+- `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Embedder-Policy: require-corp`
+
+Instead of using Python's simple HTTP server, you would need to use a server that can set these headers, like Node.js with Express or a properly configured nginx/Apache server.
+
+For development purposes, you could use the project's built-in server:
+```bash
+npm run serve
+```
+
+This would be the correct way to serve the application as it would include the necessary security headers for `SharedArrayBuffer` to work.
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+Here's a summary of what we did to get the internal server working:
+
+1. **Identified Server Dependencies**
+   - Checked `scripts/http_server.js` and found it uses Express.js and mime-types
+   - The server script uses ES modules (import statements)
+   - Verified `package.json` had `"type": "module"` set for ES module support
+
+2. **Installed Required Dependencies**
+   ```bash
+   npm install express mime-types
+   ```
+
+3. **Made Server Script Executable**
+   ```bash
+   chmod +x scripts/http_server.js
+   ```
+
+4. **Started Server with Multithreading**
+   ```bash
+   MULTITHREAD=1 node scripts/http_server.js
+   ```
+   - The `MULTITHREAD=1` environment variable enables important security headers:
+     - `Cross-Origin-Embedder-Policy: require-corp`
+     - `Cross-Origin-Opener-Policy: same-origin`
+   - These headers are required for `SharedArrayBuffer` support, which is needed for WebAssembly threading
+
+5. **Server Configuration**
+   - Runs on port 8080
+   - Serves static files from project root
+   - Sets CORS and cache control headers
+   - With multithreading enabled, adds required security headers for SharedArrayBuffer support
+
+The server is now accessible at http://localhost:8080 and properly configured to run the WebAssembly application with threading support.
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+Here's a comprehensive set of notes about what we accomplished and learned:
+
+```markdown
+# WLLAMA Large Model Implementation Notes
+
+## Successfully Implemented Approach
+1. Model Preparation
+   - Original model size: ~7.7GB
+   - Quantized to Q2: 2.72GB
+   - Split into ~512MB shards
+   - Sharding approach worked with wllama's architecture
+
+2. Build Process (Prerequisites)
+   ```bash
+   git clone https://github.com/pbosh/wllama.git
+   cd wllama
+   npm install
+   npm run build:wasm    # Requires Docker
+   ```
+
+3. Directory Structure Fix
+   ```bash
+   rm src/single-thread
+   mkdir -p src/single-thread
+   cp src/multi-thread/wllama.js src/multi-thread/wllama.wasm src/single-thread/
+   ```
+
+4. Build and Server Setup
+   ```bash
+   npm run build
+   npm install express mime-types
+   chmod +x scripts/http_server.js
+   MULTITHREAD=1 node scripts/http_server.js
+   ```
+
+## WebAssembly Memory Research
+
+### Current Limitations
+1. WebAssembly (wasm32) Constraints:
+   - Hard limit of 4GB due to 32-bit addressing
+   - Default allocation limit of 2GB
+   - Requires special handling for 2GB-4GB range
+
+2. Memory Management Requirements for >2GB:
+   - Build flags needed: 
+     ```bash
+     emcc -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4GB
+     ```
+   - Code must use unsigned shifts (`>>>` instead of `>>`)
+   - Special handling for addresses above 2GB mark
+
+### Future Possibilities
+1. wasm64:
+   - In development
+   - Will allow >4GB memory
+   - Will have double memory overhead for pointers
+   - Timeline uncertain
+
+2. Current Workarounds:
+   - Model quantization (Q2, Q4, Q8)
+   - Model sharding (~512MB chunks)
+   - Streaming inference
+   - Server-side API approaches
+
+## Implementation Notes
+1. Server Requirements:
+   - Needs specific security headers for SharedArrayBuffer:
+     - Cross-Origin-Embedder-Policy: require-corp
+     - Cross-Origin-Opener-Policy: same-origin
+   - Use built-in server with MULTITHREAD=1 flag
+
+2. Model Loading:
+   - Local disk loading works with sharded approach
+   - ~512MB per shard is a good balance
+   - Browser can handle loading and inference with this setup
+
+## Research Sources
+1. V8 Documentation:
+   - [4GB WebAssembly Memory Support](https://v8.dev/blog/4gb-wasm-memory)
+   - Details on memory management and limitations
+
+2. WebAssembly Design Issues:
+   - Memory64 proposal in progress
+   - Current 32-bit limitations
+   - Browser security considerations
+
+3. Browser Implementation:
+   - Chrome/V8 work on larger memory support
+   - Security headers requirements
+   - Memory allocation strategies
+
+## Current Status
+- Working implementation with sharded Q2 model
+- Successfully running inference in browser
+- Limited by current WebAssembly memory constraints
+- Sharding approach works but not ideal for all use cases
+
+## Future Considerations
+1. Potential Improvements:
+   - Modify build process for >2GB support
+   - Implement streaming inference
+   - Wait for wasm64 support
+   - Optimize shard loading/unloading
+
+2. Trade-offs:
+   - Model size vs. quality (quantization)
+   - Memory usage vs. performance
+   - Implementation complexity vs. functionality
+```
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+I'll break down the GGML quantization methods shown in the screenshot:
+
+### Suffix Meanings
+- **K**: Uses K-means clustering for quantization
+- **K_S**: K-means clustering with "Small" block size
+- **K_M**: K-means clustering with "Medium" block size
+- **K_L**: K-means clustering with "Large" block size
+- **0**: Basic linear quantization (no K-means)
+
+### Detailed Breakdown
+
+1. **Q2 Methods**
+   - `Q2_K`: 2-bit quantization with K-means
+   - Highest compression (16x smaller than F16)
+   - Best quality-to-size ratio for 2-bit
+   - Good for very large models where size is critical
+
+2. **Q3 Methods**
+   - `Q3_K_S`: 3-bit, K-means, small blocks
+   - `Q3_K_M`: 3-bit, K-means, medium blocks
+   - `Q3_K_L`: 3-bit, K-means, large blocks
+   - Better quality than Q2
+   - Different block sizes offer trade-offs between accuracy and inference speed
+
+3. **Q4 Methods**
+   - `Q4_0`: 4-bit linear quantization
+   - `Q4_K_S`: 4-bit, K-means, small blocks
+   - `Q4_K_M`: 4-bit, K-means, medium blocks
+   - Good balance of quality and size
+   - `Q4_0` is faster but less accurate than K-means versions
+
+4. **Q5 Methods**
+   - `Q5_0`: 5-bit linear quantization
+   - `Q5_K_S`: 5-bit, K-means, small blocks
+   - `Q5_K_M`: 5-bit, K-means, medium blocks
+   - Better quality than Q4
+   - Larger file size than Q4
+
+5. **Q6 Methods**
+   - `Q6_K`: 6-bit with K-means
+   - Higher quality than Q5
+   - Larger file size
+
+6. **Q8 Methods**
+   - `Q8_0`: 8-bit linear quantization
+   - Highest quality among quantized versions
+   - Largest file size of quantized versions
+   - Still significantly smaller than F16
+
+### Trade-offs
+
+1. **Block Size (S/M/L)**
+   - **Small**: Better accuracy, slower inference
+   - **Medium**: Balanced approach
+   - **Large**: Faster inference, slightly lower accuracy
+
+2. **K-means vs Linear (0)**
+   - **K-means**: Better quality, slower inference
+   - **Linear**: Faster inference, lower quality
+   - **Memory**: K-means versions typically use more memory during inference
+
+3. **General Rules**
+   - Lower bits = smaller size but lower quality
+   - K-means versions generally provide better quality than linear
+   - Larger block sizes = faster inference but potentially lower quality
+   - Each step up in bits (Q2 → Q3 → Q4, etc.) provides better quality but larger size
+
+For your use case with wllama in the browser, Q2_K was a good choice as it:
+1. Provides the smallest file size (critical for browser)
+2. Uses K-means for better quality than linear
+3. Still maintains acceptable inference quality
+4. Works well with the sharding approach you implemented
+
+
+Exactly! Let me break this down even more clearly:
+
+1. **File Size Priority** (from smallest to largest):
+   - Q2 < Q3 < Q4 < Q5 < Q6 < Q8
+   - Each step up roughly increases file size by ~25-50%
+
+2. **Quality Optimization** (for any given Q number):
+   - Best Quality: Use `K` variants
+   - Example: Q2_K is better quality than a theoretical Q2_0 (if it existed)
+   - Trade-off: K-means versions are slightly slower in inference
+
+3. **Block Size Impact** (when available):
+   ```
+   K_S (Small blocks)  : Highest accuracy, Slowest speed
+   K_M (Medium blocks) : Balanced accuracy/speed
+   K_L (Large blocks)  : Lower accuracy, Fastest speed
+   ```
+
+So in your case with Q2_K:
+- You chose Q2 for smallest possible file size (critical for browser)
+- You got the _K variant for best possible quality at that size
+- No block size option for Q2 (only available in Q3/Q4/Q5)
+
+This is why Q2_K was ideal for your browser implementation:
+1. Smallest file size (Q2)
+2. Best possible quality for that size (_K)
+3. Simple version without block size complexity
+
+If you ever need to adjust, remember:
+- Need smaller size? Stay with Q2_K
+- Need better quality? Move up to Q3_K_S/M/L
+- Need faster inference? Consider Q3_K_L or Q4_0
+
+
+Summary:
+Here's a comprehensive breakdown of all quantization methods shown in the screenshot, ordered by quality vs size trade-off (assuming BF16 = 100% quality):
+
+### 8-bit
+- **Q8_0** (~98-99% quality)
+  - Linear quantization (no K-means)
+  - Largest file size of quantized versions
+  - Fastest inference speed
+  - Best for quality-critical applications
+
+### 6-bit
+- **Q6_K** (~97-98% quality)
+  - Uses K-means clustering
+  - No block size variants needed at this precision
+  - Good balance of quality and size
+  - Slightly slower than Q6_0 would be (if it existed)
+
+### 5-bit
+- **Q5_K_S** (~96-97% quality)
+  - K-means with small blocks
+  - Highest quality 5-bit option
+  - Slowest 5-bit inference
+- **Q5_K_M** (~96% quality)
+  - K-means with medium blocks
+  - Balanced speed/quality trade-off
+- **Q5_0** (~94-95% quality)
+  - Linear quantization
+  - Fastest 5-bit inference
+  - Lowest quality 5-bit option
+
+### 4-bit
+- **Q4_K_S** (~95-96% quality)
+  - K-means with small blocks
+  - Best 4-bit quality
+  - Slower inference
+- **Q4_K_M** (~94-95% quality)
+  - K-means with medium blocks
+  - Good balance for 4-bit
+- **Q4_0** (~92-93% quality)
+  - Linear quantization
+  - Fastest 4-bit inference
+  - Popular "good enough" choice
+
+### 3-bit
+- **Q3_K_S** (~91-92% quality)
+  - K-means with small blocks
+  - Best 3-bit quality
+- **Q3_K_M** (~90-91% quality)
+  - K-means with medium blocks
+  - Balanced 3-bit option
+- **Q3_K_L** (~89-90% quality)
+  - K-means with large blocks
+  - Fastest 3-bit inference
+
+### 2-bit
+- **Q2_K** (~90-92% quality)
+  - K-means clustering
+  - Smallest file size
+  - No block size variants
+  - Good for browser deployment
+
+### Size Reduction (approximate):
+```
+BF16 (original) : 100% size
+Q8_0           : ~50% of original
+Q6_K           : ~37.5% of original
+Q5_K variants  : ~31% of original
+Q4_K variants  : ~25% of original
+Q3_K variants  : ~19% of original
+Q2_K           : ~12.5% of original
+```
+
+### Speed Patterns:
+```
+Fastest → Slowest
+1. _0 variants (linear)
+2. _K_L (large blocks)
+3. _K_M (medium blocks)
+4. _K_S (small blocks)
+5. _K (basic K-means)
+```
+
+### When to Use Each:
+- **Q8_0**: When quality is critical and size less important
+- **Q6_K**: Best balance of quality and size
+- **Q5_K_S/M**: When Q6_K is too large but Q4 too low quality
+- **Q4_K_S**: Most popular quality-conscious choice
+- **Q4_0**: Most popular speed-conscious choice
+- **Q3_K variants**: When size is very important
+- **Q2_K**: When minimum size is critical (browser deployment)
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+Let me show you the server code:
+
+Read file: scripts/http_server.js
+
+
+Here's what the server code does:
+
+1. **Imports**:
+   ```javascript
+   import express from 'express';
+   import path from 'path';
+   import mime from 'mime-types';
+   import { dirname } from 'path';
+   import { fileURLToPath } from 'url';
+   ```
+   - Uses Express.js for the web server
+   - Includes utilities for path handling and MIME types
+
+2. **Static File Serving**:
+   ```javascript
+   app.use(express.static(path.join(__dirname, '..'), {
+     setHeaders: (res) => {
+       if (process.env.MULTITHREAD) {
+         res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+         res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+       }
+       res.setHeader('Access-Control-Allow-Origin', '*');
+       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+       res.setHeader('Pragma', 'no-cache');
+       res.setHeader('Expires', '0');
+     }
+   }));
+   ```
+   - Serves files from the project root directory
+   - When `MULTITHREAD=1`, adds security headers for SharedArrayBuffer support
+   - Enables CORS and disables caching
+
+3. **Server Start**:
+   ```javascript
+   const PORT = 8080;
+   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+   ```
+   - Runs on port 8080
+
+To run the server:
+```bash
+# Without multithreading
+node scripts/http_server.js
+
+# With multithreading (recommended)
+MULTITHREAD=1 node scripts/http_server.js
+```
+
+The key feature is the security headers when `MULTITHREAD=1` is set, which are required for WebAssembly threading support in browsers.
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
+
+
+
+
+
+============ CLAUDE SONNET CURSOR AI NOTES
