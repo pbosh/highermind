@@ -13,44 +13,26 @@ export const WLLAMA_CONFIG_PATHS = {
 
 export const MAX_GGUF_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
 
+
+
+
+
+
+//PB model list
+
 export const LIST_MODELS = [
   {
     url: 'https://huggingface.co/HigherMind/Make-Better-Decisions-1-Q3_K_L-GGUF/resolve/main/make-better-decisions-1-q3_k_l-00001-of-00008.gguf',
-    size: 3886404992,
+    size: 3880000000,
   },
   {
-    url: 'https://huggingface.co/hugging-quants/Llama-3.2-1B-Instruct-Q4_K_M-GGUF/resolve/main/llama-3.2-1b-instruct-q4_k_m.gguf',
-    size: 807690656,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/wllama-split-models/resolve/main/qwen2-1_5b-instruct-q4_k_m-00001-of-00004.gguf',
-    size: 986046272,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/SmolLM2-1.7B-Instruct-Q4_K_M-GGUF/resolve/main/smollm2-1.7b-instruct-q4_k_m.gguf',
-    size: 1055609536,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/wllama-split-models/resolve/main/gemma-2-2b-it-abliterated-Q4_K_M-00001-of-00004.gguf',
-    size: 1708583264,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/wllama-split-models/resolve/main/neuralreyna-mini-1.8b-v0.3.q4_k_m-00001-of-00005.gguf',
-    size: 1217753472,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/wllama-split-models/resolve/main/Phi-3.1-mini-128k-instruct-Q3_K_M-00001-of-00008.gguf',
-    size: 1955478176,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/wllama-split-models/resolve/main/meta-llama-3.1-8b-instruct-abliterated.Q2_K-00001-of-00014.gguf',
-    size: 3179133600,
-  },
-  {
-    url: 'https://huggingface.co/ngxson/wllama-split-models/resolve/main/Meta-Llama-3.1-8B-Instruct-Q2_K-00001-of-00014.gguf',
-    size: 3179138048,
+    url: 'https://huggingface.co/HigherMind/Alcohol_Addiction-Q3_K_L-GGUF/resolve/main/alcohol_addiction-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
   },
 ];
+
+
+//PB default settings for inference
 
 export const DEFAULT_INFERENCE_PARAMS: InferenceParams = {
   nThreads: -1, // auto
@@ -59,6 +41,10 @@ export const DEFAULT_INFERENCE_PARAMS: InferenceParams = {
   nBatch: 128,
   temperature: 0.8,
 };
+
+
+
+
 
 export const DEFAULT_CHAT_TEMPLATE =
   "{% for message in messages %}{{'<|im_start|>' + message['role'] + '\n' + message['content'] + '<|im_end|>' + '\n'}}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}";

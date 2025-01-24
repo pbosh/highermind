@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 
 
+
+##########
+CHECK check CHECK package.json to make sure the version is correct before pushing
+##########
+
+
+
+
+
+#####################################
+
+## [0.0.3] - 2024-01-22
+
+### Added
+- make better decsions model
+- alcohol addiction
+
+
+### Changed
+- Removed default wllama models from list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################
+
+
 ## [0.0.2] - 2024-01-22
 
 ### Added

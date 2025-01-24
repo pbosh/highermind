@@ -2817,11 +2817,100 @@ There are some non-critical warnings about Node.js version compatibility and out
 ============ CLAUDE SONNET CURSOR AI NOTES
 
 
+Here's a summary for your notes:
+
+# Deployment Process Summary
+
+## One-Command Deployment
+This single command handles the entire deployment process:
+```bash
+cd /Users/ms1282/devrepo/wllama-1/examples/main && npm run build && cd ../.. && git add . && git commit -m "v$(node -p "require('./examples/main/package.json').version")" && git push
+```
+
+## What Each Part Does
+1. `cd /Users/ms1282/devrepo/wllama-1/examples/main` - Navigate to main project directory
+2. `npm run build` - Build the project using Vite
+3. `cd ../..` - Return to root directory
+4. `git add .` - Stage all changes
+5. `git commit -m "v$(node -p "require('./examples/main/package.json').version")"` - Create commit with version from package.json
+6. `git push` - Push to GitHub
+
+## Version Control System
+- **package.json**: Stores the current version number
+- **CHANGELOG.md**: Documents changes in human-readable format
+- **Git**: Tracks all code changes
+- **Automatic Deployment**: Push to GitHub triggers Cloudflare Pages deployment
+
+## File Structure
+- **package.json**: Contains version number and dependencies
+- **CHANGELOG.md**: Format:
+  ```markdown
+  ## [VERSION] - DATE
+
+  ### Added
+  - New features
+
+  ### Changed
+  - Modified features
+  ```
+
+## Automation
+- Version number automatically read from package.json
+- Cloudflare Pages automatically detects GitHub pushes
+- New deployments automatically created with unique URLs
+- Each deployment gets its own preview URL
+
+
 
 
 
 ============ CLAUDE SONNET CURSOR AI NOTES
 
+
+
+
+You'll need to run this as two separate commands because you need to get the commit hash from the first command's output. Here's exactly what you'd need to copy from your notes and paste into terminal:
+
+First paste this to see the commit hash:
+```bash
+git log --grep="v0.0.1"
+```
+
+This will show output like:
+```
+commit abc123def456... (this is the hash you need)
+Author: ...
+Date: ...
+    v0.0.1: Added feature xyz
+```
+
+Then paste this, replacing ABC123 with the hash you saw:
+```bash
+git checkout ABC123 && cd examples/main && npm run build && cd ../..
+```
+
+For your notes, I recommend storing it like this:
+
+# Rollback Commands
+1. Find commit hash:
+```bash
+git log --grep="v0.0.1"    # Replace v0.0.1 with version you want
+```
+
+2. Rollback using hash from above:
+```bash
+git checkout ABC123 && cd examples/main && npm run build && cd ../..    # Replace ABC123 with hash from step 1
+```
+
+3. (Optional) Create new branch from old version:
+```bash
+git checkout -b rollback-v0.0.1 ABC123    # Replace ABC123 with same hash
+```
+
+4. Return to latest version:
+```bash
+git checkout main && cd examples/main && npm run build && cd ../..
+```
 
 
 
