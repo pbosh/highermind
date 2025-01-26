@@ -14,7 +14,7 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 ## [0.0.5] - 2024-01-22
 
 ### Added
-- 
+- many new models
 
 
 ### Changed
