@@ -117,11 +117,83 @@ export const LIST_MODELS = [
     size: 3880000000,
   },
 
+  {
+    model_title: "Understanding Intelligence",
+    url: 'https://huggingface.co/HigherMind/Understanding-Intelligence-1-Q3_K_L-GGUF/resolve/main/understanding-intelligence-1-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "The Truth Teller",
+    url: 'https://huggingface.co/HigherMind/The-Truth-Teller-1-Q3_K_L-GGUF/resolve/main/the-truth-teller-1-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "The Shamanic",
+    url: 'https://huggingface.co/HigherMind/The-Shamanic-1-Q3_K_L-GGUF/resolve/main/the-shamanic-1-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "Stress Management",
+    url: 'https://huggingface.co/HigherMind/HigherMind/STRESS_MANAGEMENT-Q3_K_L-GGUF/resolve/main/stress_management-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "The Enlightenment",
+    url: 'https://huggingface.co/HigherMind/The-Enlightened-1-Q3_K_L-GGUF/resolve/main/the-enlightened-1-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- Ulysses by James Joyce",
+    url: 'https://huggingface.co/HigherMind/TalktoBooks-Ulysses-by-James-Joyce-Q3_K_L-GGUF/resolve/main/talktobooks-ulysses-by-james-joyce-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- Shakespeare The Complete Collection",
+    url: 'https://huggingface.co/HigherMind/HigherMind/TalktoBooks-Shakespeare-The-Complete-Collection-Q3_K_L-GGUF/resolve/main/talktobooks-shakespeare-the-complete-collection-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- The Odyssey by Homer",
+    url: 'https://huggingface.co/HigherMind/TalktoBooks-The-Odyssey-by-Homer-Q3_K_L-GGUF/resolve/main/talktobooks-the-odyssey-by-homer-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- Pride and Prejudice by Jane Austen",
+    url: 'https://huggingface.co/HigherMind/TalktoBooks-Pride-and-Prejudice-Q3_K_L-GGUF/resolve/main/talktobooks-pride-and-prejudice-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- Frankenstein by Mary Shelley",
+    url: 'https://huggingface.co/HigherMind/TalktoBooks-Frankenstein-Q3_K_L-GGUF/resolve/main/talktobooks-frankenstein-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- Alice in Wonderland by Lewis Carroll",
+    url: 'https://huggingface.co/HigherMind/TalktoBooks-Alice-in-Wonderland-Q3_K_L-GGUF/resolve/main/talktobooks-alice-in-wonderland-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
+
+  {
+    model_title: "TalktoBooks- Every Grimms Fairy Tale",
+    url: 'https://huggingface.co/HigherMind/HigherMind/TalktoBooks-Grimms-Fairy-Tales-Q3_K_L-GGUF/resolve/main/talktobooks-grimms-fairy-tales-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
 
 
 
 
-  
+
+
   {
     model_title: "PLACEHOLDER",
     url: 'https://huggingface.co/HigherMind/PLACEHOLDER-Q3_K_L-GGUF/resolve/main/placeholder-q3_k_l-00001-of-00008.gguf',
@@ -137,7 +209,7 @@ export const LIST_MODELS = [
 
 export const DEFAULT_INFERENCE_PARAMS: InferenceParams = {
   nThreads: -1, // auto
-  nContext: 2048,
+  nContext: 1024,
   nPredict: 200,
   nBatch: 128,
   temperature: 0.8,

@@ -11,6 +11,28 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 #####################################
 
+## [0.0.6] - 2024-01-22
+
+### Added
+- even more many new models
+
+
+### Changed
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################
+
 ## [0.0.5] - 2024-01-22
 
 ### Added
@@ -19,11 +41,6 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 ### Changed
 - removed the ability to delete default models including the icon etc.
-
-
-
-
-
 
 
 
