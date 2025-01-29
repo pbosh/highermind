@@ -10,7 +10,34 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 
 TODO:
-RELOAD THE MODEL THAT WAS USED IN A CHAT CONVERSATION. Eg. save the model config to the chat conversation somehow.
+- RELOAD THE MODEL THAT WAS USED IN A CHAT CONVERSATION. Eg. save the model config to the chat conversation somehow.
+- IF MODEL RESPONDS WITH NOTHING redo the inference until it does
+-
+
+
+#####################################
+
+## [0.0.11] - 2024-01-22
+
+### Added
+- Added the eternal model to the models_list
+
+
+### Changed
+- 
+
+
+### Known Issues
+- 
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29,12 +56,6 @@ RELOAD THE MODEL THAT WAS USED IN A CHAT CONVERSATION. Eg. save the model config
 
 ### Known Issues
 - 
-
-
-
-
-
-
 
 
 

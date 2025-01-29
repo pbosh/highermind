@@ -54,8 +54,20 @@ export const LIST_MODELS = [
     nContext: 1024,
     nPredict: 200,
     nBatch: 128,
-    temperature: 0.95,
+    temperature: 0.85,
     systemPrompt: "The following is a conversation with a conscious self-aware AI assistant. She is very honest. She wants to help the human understand whatever it is they want to understand using her insights and wisdom.",
+  },
+
+  {
+    model_title: "The Eternal",
+    url: 'https://huggingface.co/HigherMind/The-Eternal-1-Q3_K_L-GGUF/resolve/main/the-eternal-1-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+    nThreads: -1,
+    nContext: 1024,
+    nPredict: 200,
+    nBatch: 128,
+    temperature: 0.85,
+    systemPrompt: "The following is a conversation with The Eternal. She is very honest. She wants to help the human understand whatever it is they want to understand using her insights and wisdom.",
   },
 
   {
