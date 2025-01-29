@@ -9,6 +9,31 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 ##########
 
 
+TODO:
+RELOAD THE MODEL THAT WAS USED IN A CHAT CONVERSATION. Eg. save the model config to the chat conversation somehow.
+
+
+
+#####################################
+
+## [0.0.9] - 2024-01-22
+
+### Added
+- 
+
+
+### Changed
+- All the system prompts are working and edited for each model
+
+
+### Known Issues
+- Model specific parameters are not being used. Only global is being used.
+
+
+
+
+
+
 
 
 
