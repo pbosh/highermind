@@ -3491,13 +3491,138 @@ Your real-time monitoring confirms what the llama.cpp developers have optimized 
 ============ CLAUDE SONNET CURSOR AI NOTES
 
 
+Here's a comprehensive summary of our journey to get the system prompt and message formatting working correctly:
+
+### Problem Overview
+We needed to ensure proper message formatting and system prompt handling for a Mistral-7B-Instruct-v0.3 based model, focusing on:
+1. Correct JSON message formatting
+2. Proper template application
+3. System prompt integration
+
+### Message Flow & Formatting
+1. **Initial JSON Formatting** (`wllama.context.tsx`):
+```typescript
+const formatChat = async (messages: Message[]): Promise<string> => {
+  const formattedMessages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...messages.map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    }))
+  ];
+  return JSON.stringify(formattedMessages);
+};
+```
+
+2. **Template Processing**:
+- Messages are sent as JSON to llama.cpp
+- llama.cpp autodetects the appropriate template (Mistral v1/v3 in our case)
+- The template converts JSON into the model's expected format:
+```
+// System:
+content + "\n\n"
+// User:
+"[INST] " + content + " [/INST]"
+// Assistant:
+content + "</s>"
+```
+
+### Debug Example
+A working message sequence looks like:
+```
+ℹ️ === MODEL INPUT ===
+[{
+  "role":"system",
+  "content":"The following is a conversation with an AI assistant..."
+},{
+  "role":"user",
+  "content":"Why is the sky blue?"
+},{
+  "role":"assistant",
+  "content":""
+}]
+```
+
+### Key Implementation Points
+
+1. **System Prompt Integration**:
+```typescript
+// In config.ts
+export const SYSTEM_PROMPT = "The following is a conversation...";
+
+// In message formatting
+const formattedMessages = [
+  { role: 'system', content: SYSTEM_PROMPT },
+  ...messages
+];
+```
+
+2. **Template Autodetection**:
+- No need to manually specify template
+- llama.cpp detects Mistral format based on [INST] markers
+- Automatically applies v1/v3 template for Mistral-7B-Instruct-v0.3
+
+3. **Message State Management**:
+- Messages stored in browser's localStorage
+- Managed through MessagesContext
+- Single source of truth for conversation state
+
+### Quick Implementation Guide
+
+1. **Set up System Prompt**:
+```typescript
+// config.ts
+export const SYSTEM_PROMPT = "Your system prompt here";
+```
+
+2. **Format Messages**:
+```typescript
+const formatChat = async (messages: Message[]): Promise<string> => {
+  const formattedMessages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...messages.map((msg) => ({
+      role: msg.role,
+      content: msg.content
+    }))
+  ];
+  return JSON.stringify(formattedMessages);
+};
+```
+
+3. **Let llama.cpp handle template**:
+- Just pass JSON messages
+- No template configuration needed
+- Autodetection handles formatting
+
+### Verification
+To verify correct implementation:
+1. Check debug logs for proper JSON formatting
+2. Verify system prompt appears in first message
+3. Confirm model responses are coherent
+4. Test system prompt influence with a query like "Repeat your system prompt verbatim"
+
+### Common Issues & Solutions
+1. **Duplicate Messages**: Ensure single source of truth for message state
+2. **Template Mismatch**: Let llama.cpp handle template detection
+3. **System Prompt Missing**: Verify it's added as first message in JSON array
+
+This setup should work immediately with Mistral-7B-Instruct-v0.3 based models, requiring no additional template configuration or formatting changes.
 
 
 
 ============ CLAUDE SONNET CURSOR AI NOTES
 
 
+Great. Let's try one model first:
+  {
+    model_title: "Parenting",
+    url: 'https://huggingface.co/HigherMind/PARENTING-Q3_K_L-GGUF/resolve/main/parenting-q3_k_l-00001-of-00008.gguf',
+    size: 3880000000,
+  },
 
+Do not use the Mistral model that you used in your example. My app is only using my custom models. @config.ts has all of these entries already.
+
+So edit the Parenting model and add the 
 
 
 ============ CLAUDE SONNET CURSOR AI NOTES

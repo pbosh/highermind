@@ -1,10 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { Template } from '@huggingface/jinja';
-import { Message, Screen } from './types';
-import { Wllama } from '@wllama/wllama';
-import { DEFAULT_CHAT_TEMPLATE } from '../config';
-
-const textDecoder = new TextDecoder();
+import { Screen } from './types';
 
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,28 +26,7 @@ export const WllamaStorage = {
 
 export const getDefaultScreen = (): Screen => {
   const welcome: boolean = WllamaStorage.load('welcome', true);
-  return welcome ? Screen.GUIDE : Screen.CHAT; //PB default screen on first run
-};
-
-export const formatChat = async (
-  modelWllama: Wllama,
-  messages: Message[]
-): Promise<string> => {
-  const template = new Template(
-    modelWllama.getChatTemplate() ?? DEFAULT_CHAT_TEMPLATE
-  );
-  const bos_token: string = textDecoder.decode(
-    await modelWllama.detokenize([modelWllama.getBOS()])
-  );
-  const eos_token: string = textDecoder.decode(
-    await modelWllama.detokenize([modelWllama.getEOS()])
-  );
-  return template.render({
-    messages,
-    bos_token,
-    eos_token,
-    add_generation_prompt: true,
-  });
+  return welcome ? Screen.GUIDE : Screen.CHAT;
 };
 
 export const toHumanReadableSize = (bytes: number): string => {
@@ -71,20 +45,24 @@ export const toHumanReadableSize = (bytes: number): string => {
 export const DebugLogger = {
   content: [] as string[],
   debug(...args: any) {
-    console.debug('🔧', ...args);
-    DebugLogger.content.push(`🔧 ${DebugLogger.argsToStr(args)}`);
+    const message = DebugLogger.argsToStr(args);
+    console.debug('ℹ️', ...args);
+    DebugLogger.content.push(`ℹ️ ${message}`);
   },
-  log(...args: any) {
-    console.log('ℹ️', ...args);
-    DebugLogger.content.push(`ℹ️ ${DebugLogger.argsToStr(args)}`);
+  log(..._args: any) {
+    // Commented out for now
+    // console.log('ℹ️', ..._args);
+    // DebugLogger.content.push(`ℹ️ ${DebugLogger.argsToStr(_args)}`);
   },
-  warn(...args: any) {
-    console.warn('⚠️', ...args);
-    DebugLogger.content.push(`⚠️ ${DebugLogger.argsToStr(args)}`);
+  warn(..._args: any) {
+    // Commented out for now
+    // console.warn('⚠️', ..._args);
+    // DebugLogger.content.push(`⚠️ ${DebugLogger.argsToStr(_args)}`);
   },
   error(...args: any) {
+    // Keep error logging but use console.error
     console.error('☠️', ...args);
-    DebugLogger.content.push(`☠️ ${DebugLogger.argsToStr(args)}`);
+    // DebugLogger.content.push(`☠️ ${DebugLogger.argsToStr(args)}`);
   },
   argsToStr(args: any[]): string {
     return args

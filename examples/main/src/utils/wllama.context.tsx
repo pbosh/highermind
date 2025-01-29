@@ -7,7 +7,7 @@ import {
 } from './utils';
 import { Model, ModelManager, Wllama } from '@wllama/wllama';
 import { DEFAULT_INFERENCE_PARAMS, WLLAMA_CONFIG_PATHS } from '../config';
-import { InferenceParams, RuntimeInfo, ModelState, Screen } from './types';
+import { InferenceParams, RuntimeInfo, ModelState, Screen, Message } from './types';
 import { verifyCustomModel } from './custom-models';
 import {
   DisplayedModel,
@@ -43,6 +43,7 @@ interface WllamaContextValue {
     input: string,
     callback: (piece: string) => void
   ): Promise<void>;
+  formatChat(messages: Message[]): Promise<string>;
   stopCompletion(): void;
   isGenerating: boolean;
   currentConvId: number;
@@ -55,14 +56,25 @@ interface WllamaContextValue {
 const WllamaContext = createContext<WllamaContextValue>({} as any);
 
 const modelManager = new ModelManager();
-let wllamaInstance = new Wllama(WLLAMA_CONFIG_PATHS, { logger: DebugLogger });
+let wllamaInstance = new Wllama(WLLAMA_CONFIG_PATHS);
 let stopSignal = false;
+let stopTokens: number[] = [];
+
 const resetWllamaInstance = () => {
-  wllamaInstance = new Wllama(WLLAMA_CONFIG_PATHS, { logger: DebugLogger });
+  wllamaInstance = new Wllama(WLLAMA_CONFIG_PATHS);
+  stopTokens = [];
 };
 
-export const WllamaProvider = ({ children }: any) => {
-  const [isGenerating, setGenerating] = useState(false);
+const initStopTokens = async () => {
+  // Initialize empty stop tokens array
+  stopTokens = [];
+  DebugLogger.debug('Initialized stop tokens:', stopTokens);
+};
+
+export const WllamaProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentConvId, setCurrentConvId] = useState(-1);
   const [currScreen, setScreen] = useState<Screen>(getDefaultScreen());
   const [cachedModels, setCachedModels] = useState<Model[]>([]);
@@ -158,11 +170,9 @@ export const WllamaProvider = ({ children }: any) => {
     }
     setLoadedModel(model.clone({ state: ModelState.LOADING }));
     try {
-      await wllamaInstance.loadModel(model.cachedModel, {
-        n_threads: currParams.nThreads > 0 ? currParams.nThreads : undefined,
-        n_ctx: currParams.nContext,
-        n_batch: currParams.nBatch,
-      });
+      await model.cachedModel.validate();
+      await wllamaInstance.loadModel(model.cachedModel);
+      await initStopTokens();
       setLoadedModel(model.clone({ state: ModelState.LOADED }));
       setCurrRuntimeInfo({
         isMultithread: wllamaInstance.isMultithread(),
@@ -170,7 +180,11 @@ export const WllamaProvider = ({ children }: any) => {
       });
     } catch (e) {
       resetWllamaInstance();
-      alert(`Failed to load model: ${(e as any).message ?? 'Unknown error'}`);
+      const errorMessage = e instanceof Error ? e.message : 
+        (typeof e === 'string' ? e : 'Unknown error while loading model');
+      DebugLogger.debug('Model loading error:', e);
+      DebugLogger.debug('Error type:', typeof e);
+      alert(`Failed to load model: ${errorMessage}`);
       setLoadedModel(undefined);
     }
   };
@@ -183,28 +197,73 @@ export const WllamaProvider = ({ children }: any) => {
     setCurrRuntimeInfo(undefined);
   };
 
+  const formatChat = async (messages: Message[]): Promise<string> => {
+    // Convert messages to the format expected by createChatCompletion
+    const formattedMessages = messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+
+    // Return as JSON string
+    return JSON.stringify(formattedMessages);
+  };
+
   const createCompletion = async (
     input: string,
-    callback: (currentText: string) => void
+    callback: (piece: string) => void
   ) => {
-    if (isDownloading || !loadedModel || isLoadingModel) return;
-    setGenerating(true);
-    stopSignal = false;
-    const result = await wllamaInstance.createCompletion(input, {
-      nPredict: currParams.nPredict,
-      useCache: true,
-      sampling: {
-        temp: currParams.temperature,
-      },
-      // @ts-ignore unused variable
-      onNewToken(token, piece, currentText, optionals) {
-        callback(currentText);
-        if (stopSignal) optionals.abortSignal();
-      },
-    });
-    callback(result);
-    stopSignal = false;
-    setGenerating(false);
+    try {
+      setIsGenerating(true);
+      stopSignal = false;
+      
+      DebugLogger.debug('=== MODEL STATE ===');
+      DebugLogger.debug('Model loaded:', !!loadedModel);
+      DebugLogger.debug('Is generating:', isGenerating);
+      DebugLogger.debug('=== END MODEL STATE ===');
+
+      const completionOpts = {
+        stopTokens,
+        nPredict: currParams.nPredict,
+        sampling: {
+          temp: currParams.temperature,
+          topP: 0.9,
+          repeatPenalty: 1.1
+        },
+        onNewToken: (_: number, __: Uint8Array, currentText: string) => {
+          if (stopSignal) {
+            DebugLogger.debug('Generation stopped by user');
+            return;
+          }
+          callback(currentText);
+        },
+      };
+
+      DebugLogger.debug('Completion options:', completionOpts);
+      
+      let finalText = '';
+      await wllamaInstance.createChatCompletion(JSON.parse(input), {
+        ...completionOpts,
+        onNewToken: (_: number, __: Uint8Array, currentText: string) => {
+          if (stopSignal) {
+            DebugLogger.debug('Generation stopped by user');
+            return;
+          }
+          finalText = currentText;
+          callback(currentText);
+        }
+      });
+      
+      DebugLogger.debug('=== COMPLETION END ===');
+      DebugLogger.debug('Final generated text:', finalText);
+
+    } catch (error: any) {
+      DebugLogger.debug('=== COMPLETION ERROR ===');
+      DebugLogger.debug('Error type:', error.constructor.name);
+      DebugLogger.debug('Error message:', error.message);
+      console.error(error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const stopCompletion = () => {
@@ -259,32 +318,46 @@ export const WllamaProvider = ({ children }: any) => {
     setBusy(false);
   };
 
+  const contextValue = useMemo<WllamaContextValue>(
+    () => ({
+      models,
+      downloadModel,
+      removeCachedModel,
+      removeAllCachedModels,
+      isDownloading,
+      isLoadingModel,
+      currParams,
+      setParams,
+      loadedModel,
+      currRuntimeInfo,
+      loadModel,
+      unloadModel,
+      addCustomModel,
+      removeCustomModel,
+      getWllamaInstance: () => wllamaInstance,
+      createCompletion,
+      formatChat,
+      stopCompletion,
+      isGenerating,
+      currentConvId,
+      navigateTo,
+      currScreen,
+    }),
+    [
+      models,
+      isDownloading,
+      isLoadingModel,
+      currParams,
+      loadedModel,
+      currRuntimeInfo,
+      isGenerating,
+      currentConvId,
+      currScreen,
+    ]
+  );
+
   return (
-    <WllamaContext.Provider
-      value={{
-        models,
-        isDownloading,
-        isLoadingModel,
-        downloadModel,
-        removeCachedModel,
-        removeAllCachedModels,
-        loadedModel,
-        loadModel,
-        unloadModel,
-        currParams,
-        setParams,
-        createCompletion,
-        stopCompletion,
-        isGenerating,
-        currentConvId,
-        navigateTo,
-        currScreen,
-        getWllamaInstance: () => wllamaInstance,
-        addCustomModel,
-        removeCustomModel,
-        currRuntimeInfo,
-      }}
-    >
+    <WllamaContext.Provider value={contextValue}>
       {children}
     </WllamaContext.Provider>
   );

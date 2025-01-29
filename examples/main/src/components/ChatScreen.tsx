@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useMessages } from '../utils/messages.context';
 import { useWllama } from '../utils/wllama.context';
 import { Message, Screen } from '../utils/types';
-import { formatChat } from '../utils/utils';
+import { DebugLogger } from '../utils/utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStop } from '@fortawesome/free-solid-svg-icons';
 import { nl2br } from '../utils/nl2br';
 import ScreenWrapper from './ScreenWrapper';
 import { useIntervalWhen } from '../utils/use-interval-when';
+import { SYSTEM_PROMPT } from '../config';
 
 export default function ChatScreen() {
   const [input, setInput] = useState('');
@@ -15,9 +16,9 @@ export default function ChatScreen() {
     currentConvId,
     isGenerating,
     createCompletion,
+    formatChat,
     navigateTo,
     loadedModel,
-    getWllamaInstance,
     stopCompletion,
   } = useWllama();
   const {
@@ -35,7 +36,6 @@ export default function ChatScreen() {
     if (isGenerating) return;
 
     // copy input and create messages
-    const currHistory = currConv?.messages ?? [];
     const userInput = input;
     setInput('');
     const userMsg: Message = {
@@ -51,30 +51,61 @@ export default function ChatScreen() {
 
     // process conversation
     let convId = currConv?.id;
+    let messages: Message[] = [];
+    
     if (!convId) {
-      // need to create new conversation
-      const newConv = newConversation(userMsg);
+      // need to create new conversation with system message
+      const systemMsg: Message = {
+        id: Date.now() - 1,
+        content: SYSTEM_PROMPT,
+        role: 'system',
+      };
+      messages = [systemMsg];
+      const newConv = newConversation(systemMsg);
       convId = newConv.id;
       navigateTo(Screen.CHAT, convId);
-      addMessageToConversation(convId, assistantMsg);
     } else {
-      // append to current conversation
-      addMessageToConversation(convId, userMsg);
-      addMessageToConversation(convId, assistantMsg);
+      // Get existing messages before adding new ones
+      messages = [...(getConversationById(convId)?.messages ?? [])];
     }
+
+    // Add new messages to both local array and storage
+    messages.push(userMsg);
+    messages.push(assistantMsg);
+    addMessageToConversation(convId, userMsg);
+    addMessageToConversation(convId, assistantMsg);
 
     // generate response
     if (!loadedModel) {
       throw new Error('loadedModel is null');
     }
-    const formattedChat = await formatChat(getWllamaInstance(), [
-      ...currHistory,
-      userMsg,
-    ]);
-    console.log({ formattedChat });
-    await createCompletion(formattedChat, (newContent) => {
-      editMessageInConversation(convId, assistantMsg.id, newContent);
-    });
+
+    DebugLogger.debug('=== MODEL STATE ===');
+    DebugLogger.debug('Model loaded:', !!loadedModel);
+    DebugLogger.debug('Is generating:', isGenerating);
+    DebugLogger.debug('=== END MODEL STATE ===');
+
+    // Format messages for chat completion
+    const formattedChat = await formatChat(messages);
+    DebugLogger.debug('=== MODEL INPUT ===\n' + formattedChat + '\n=== END MODEL INPUT ===');
+
+    let isFirstUpdate = true;
+    try {
+      await createCompletion(formattedChat, (newContent) => {
+        editMessageInConversation(convId, assistantMsg.id, newContent);
+        if (isFirstUpdate) {
+          isFirstUpdate = false;
+        }
+      });
+    } catch (error) {
+      DebugLogger.error('Error during completion:', error);
+      editMessageInConversation(convId, assistantMsg.id, 'Error: Failed to generate response');
+    }
+    // Log the final message after completion
+    const finalMessage = getConversationById(convId)?.messages.find(m => m.id === assistantMsg.id);
+    if (finalMessage) {
+      DebugLogger.debug('=== MODEL RESPONSE ===\n' + finalMessage.content + '\n=== END MODEL RESPONSE ===');
+    }
   };
 
   return (
@@ -84,8 +115,11 @@ export default function ChatScreen() {
 
         {currConv ? (
           <>
-            {currConv.messages.map((msg) =>
-              msg.role === 'user' ? (
+            {currConv.messages.map((msg) => {
+              if (msg.role === 'system') {
+                return null; // Don't display system messages in the UI
+              }
+              return msg.role === 'user' ? (
                 <div className="chat chat-end" key={msg.id}>
                   <div className="chat-bubble">{nl2br(msg.content)}</div>
                 </div>
@@ -98,8 +132,8 @@ export default function ChatScreen() {
                     {nl2br(msg.content)}
                   </div>
                 </div>
-              )
-            )}
+              );
+            })}
           </>
         ) : (
           <div className="pt-24 text-center text-xl">Ask me something 👋</div>

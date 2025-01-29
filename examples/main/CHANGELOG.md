@@ -8,6 +8,27 @@ All notable changes to this project will be documented in this file.
 CHECK check CHECK package.json to make sure the version is correct before pushing
 ##########
 
+#####################################
+
+## [0.0.7] - 2024-01-22
+
+### Added
+- even more many new models
+- system prompt. this was hard and took 4 hours. It is only using one system prompt for the entire system, eg. all models use one prompt. next thing to do is make it so each model uses it's own system prompt.
+
+
+### Changed
+- lots of files to get the above working. notes for this change are in the wllama_docs.txt
+
+
+
+
+
+
+
+
+
+
 
 #####################################
 
@@ -19,15 +40,6 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 ### Changed
 - 
-
-
-
-
-
-
-
-
-
 
 
 

@@ -215,9 +215,7 @@ export const DEFAULT_INFERENCE_PARAMS: InferenceParams = {
   temperature: 0.8,
 };
 
+export const SYSTEM_PROMPT = "The following is a conversation with an AI assistant that is an expert on parenting. She is very honest. She wants to help the human understand whatever it is they want to understand using her insights and wisdom.";
 
-
-
-
-export const DEFAULT_CHAT_TEMPLATE =
-  "{% for message in messages %}{{'<|im_start|>' + message['role'] + '\n' + message['content'] + '<|im_end|>' + '\n'}}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}";
+// First output system message if present, then all non-system messages, and finally an empty assistant tag
+export const DEFAULT_CHAT_TEMPLATE = "{% if messages[0]['role'] == 'system' %}<system>{{ messages[0]['content'] }}</system>{% endif %}{% for message in messages %}{% if message['role'] != 'system' %}\n\n<{{ message['role'] }}>{{ message['content'] }}</{{ message['role'] }}>{% endif %}{% endfor %}{% if add_generation_prompt %}\n\n<assistant>{% endif %}";
