@@ -77,7 +77,12 @@ export default function Sidebar({ children }: { children: any }) {
 
             {loadedModel && (
               <div className="text-sm px-4 pb-2">
-                Model: {loadedModel.hfModel}
+                <div>Model: {loadedModel.hfModel}</div>
+                {currConv && (
+                  <div className="mt-1 text-xs opacity-70">
+                    System: {currConv.messages.find(m => m.role === 'system')?.content}
+                  </div>
+                )}
               </div>
             )}
 

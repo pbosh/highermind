@@ -6,7 +6,7 @@ import {
   faXmark,
   faCheck,
 } from '@fortawesome/free-solid-svg-icons';
-import { DEFAULT_INFERENCE_PARAMS } from '../config';
+import { LIST_MODELS } from '../config';
 import { toHumanReadableSize, useDebounce } from '../utils/utils';
 import { useEffect, useState } from 'react';
 import ScreenWrapper from './ScreenWrapper';
@@ -18,22 +18,29 @@ export default function ModelScreen() {
     models,
     removeCachedModel,
     isLoadingModel,
-    isDownloading,
     loadedModel,
     currParams,
     setParams,
   } = useWllama();
 
-  const blockModelBtn = !!(loadedModel || isDownloading || isLoadingModel);
+  const blockModelBtn = !!(loadedModel || isLoadingModel);
 
   const onChange = (key: keyof typeof currParams) => (e: any) => {
-    setParams({ ...currParams, [key]: parseFloat(e.target.value || -1) });
+    const val = Number(e.target.value);
+    if (Number.isNaN(val)) return;
+    setParams({ ...currParams, [key]: val });
   };
 
+  const onReset = () => {
+    setParams({
+      nThreads: LIST_MODELS[0].nThreads,
+      nContext: LIST_MODELS[0].nContext,
+      nPredict: LIST_MODELS[0].nPredict,
+      nBatch: LIST_MODELS[0].nBatch,
+      temperature: LIST_MODELS[0].temperature,
+    });
+  };
 
-
-
-  
   return (
     <ScreenWrapper>
 
@@ -128,7 +135,7 @@ export default function ModelScreen() {
 
         <button
           className="btn btn-sm mr-2"
-          onClick={() => setParams(DEFAULT_INFERENCE_PARAMS)}
+          onClick={onReset}
         >
           Reset params
         </button>

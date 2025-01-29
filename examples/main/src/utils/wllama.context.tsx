@@ -6,7 +6,7 @@ import {
   WllamaStorage,
 } from './utils';
 import { Model, ModelManager, Wllama } from '@wllama/wllama';
-import { DEFAULT_INFERENCE_PARAMS, WLLAMA_CONFIG_PATHS } from '../config';
+import { WLLAMA_CONFIG_PATHS, LIST_MODELS } from '../config';
 import { InferenceParams, RuntimeInfo, ModelState, Screen, Message } from './types';
 import { verifyCustomModel } from './custom-models';
 import {
@@ -75,18 +75,29 @@ export const WllamaProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentConvId, setCurrentConvId] = useState(-1);
-  const [currScreen, setScreen] = useState<Screen>(getDefaultScreen());
+  const [currentConvId, setCurrentConvId] = useState<number>(0);
+  const [currScreen, setCurrScreen] = useState<Screen>(getDefaultScreen());
   const [cachedModels, setCachedModels] = useState<Model[]>([]);
   const [isBusy, setBusy] = useState(false);
   const [currRuntimeInfo, setCurrRuntimeInfo] = useState<RuntimeInfo>();
-  const [currParams, setCurrParams] = useState<InferenceParams>(
-    WllamaStorage.load('params', DEFAULT_INFERENCE_PARAMS)
-  );
+  const [currParams, setCurrParams] = useState<InferenceParams>({
+    nThreads: LIST_MODELS[0].nThreads,
+    nContext: LIST_MODELS[0].nContext,
+    nPredict: LIST_MODELS[0].nPredict,
+    nBatch: LIST_MODELS[0].nBatch,
+    temperature: LIST_MODELS[0].temperature,
+  });
   const [downloadingProgress, setDownloadingProgress] = useState<
     Record<DisplayedModel['url'], number>
   >({});
   const [loadedModel, setLoadedModel] = useState<DisplayedModel>();
+
+  const isDownloading = useMemo(
+    () => Object.values(downloadingProgress).some((p) => p >= 0 && p < 100),
+    [downloadingProgress]
+  );
+
+  const isLoadingModel = useMemo(() => isBusy, [isBusy]);
 
   const refreshCachedModels = async () => {
     setCachedModels(await modelManager.getModels());
@@ -107,14 +118,6 @@ export const WllamaProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     return list;
   }, [cachedModels, downloadingProgress, loadedModel]);
-  const isDownloading = useMemo(
-    () => models.some((m) => m.state === ModelState.DOWNLOADING),
-    [models]
-  );
-  const isLoadingModel = useMemo(
-    () => isBusy || loadedModel?.state === ModelState.LOADING,
-    [loadedModel, isBusy]
-  );
 
   // utils
   const updateModelDownloadState = (
@@ -271,8 +274,8 @@ export const WllamaProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const navigateTo = (screen: Screen, conversationId?: number) => {
-    setScreen(screen);
-    setCurrentConvId(conversationId ?? -1);
+    setCurrScreen(screen);
+    setCurrentConvId(conversationId ?? 0);
     if (screen === Screen.MODEL) {
       WllamaStorage.save('welcome', false);
     }

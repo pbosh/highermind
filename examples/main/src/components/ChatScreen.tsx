@@ -8,7 +8,7 @@ import { faStop } from '@fortawesome/free-solid-svg-icons';
 import { nl2br } from '../utils/nl2br';
 import ScreenWrapper from './ScreenWrapper';
 import { useIntervalWhen } from '../utils/use-interval-when';
-import { SYSTEM_PROMPT } from '../config';
+import { LIST_MODELS } from '../config';
 
 export default function ChatScreen() {
   const [input, setInput] = useState('');
@@ -55,9 +55,10 @@ export default function ChatScreen() {
     
     if (!convId) {
       // need to create new conversation with system message
+      const modelConfig = LIST_MODELS.find(m => m.url === loadedModel?.url);
       const systemMsg: Message = {
         id: Date.now() - 1,
-        content: SYSTEM_PROMPT,
+        content: modelConfig?.systemPrompt || "The following is a conversation with an AI assistant.",
         role: 'system',
       };
       messages = [systemMsg];

@@ -8,6 +8,24 @@ All notable changes to this project will be documented in this file.
 CHECK check CHECK package.json to make sure the version is correct before pushing
 ##########
 
+
+
+
+
+#####################################
+
+## [0.0.8] - 2024-01-22
+
+### Added
+- system prompt and parameters are now unique to the model. config.ts 
+
+
+### Changed
+- 
+
+
+
+
 #####################################
 
 ## [0.0.7] - 2024-01-22
@@ -19,14 +37,6 @@ CHECK check CHECK package.json to make sure the version is correct before pushin
 
 ### Changed
 - lots of files to get the above working. notes for this change are in the wllama_docs.txt
-
-
-
-
-
-
-
-
 
 
 
