@@ -6,7 +6,7 @@ import {
   WllamaStorage,
 } from './utils';
 import { Model, ModelManager, Wllama } from '@wllama/wllama';
-import { WLLAMA_CONFIG_PATHS, LIST_MODELS } from '../config';
+import { WLLAMA_CONFIG_PATHS, LIST_MODELS, getModelParams } from '../config';
 import { InferenceParams, RuntimeInfo, ModelState, Screen, Message } from './types';
 import { verifyCustomModel } from './custom-models';
 import {
@@ -176,6 +176,15 @@ export const WllamaProvider: React.FC<{ children: React.ReactNode }> = ({
       await model.cachedModel.validate();
       await wllamaInstance.loadModel(model.cachedModel);
       await initStopTokens();
+      // Set parameters from model configuration
+      const modelParams = getModelParams(model.url);
+      setParams({
+        nThreads: modelParams.nThreads,
+        nContext: modelParams.nContext,
+        nPredict: modelParams.nPredict,
+        nBatch: modelParams.nBatch,
+        temperature: modelParams.temperature,
+      });
       setLoadedModel(model.clone({ state: ModelState.LOADED }));
       setCurrRuntimeInfo({
         isMultithread: wllamaInstance.isMultithread(),
@@ -227,10 +236,13 @@ export const WllamaProvider: React.FC<{ children: React.ReactNode }> = ({
       const completionOpts = {
         stopTokens,
         nPredict: currParams.nPredict,
+        nBatch: currParams.nBatch,
         sampling: {
           temp: currParams.temperature,
           topP: 0.9,
-          repeatPenalty: 1.1
+          repeatPenalty: 1.1,
+          nThreads: currParams.nThreads,
+          nContext: currParams.nContext
         },
         onNewToken: (_: number, __: Uint8Array, currentText: string) => {
           if (stopSignal) {

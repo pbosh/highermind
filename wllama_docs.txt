@@ -4259,6 +4259,51 @@ export const LIST_MODELS = [
 ============ CLAUDE SONNET CURSOR AI NOTES
 
 
+I'll provide a detailed summary of the issue and solution:
+
+**Initial Problem & Investigation:**
+1. The model parameters (like temperature) defined in `LIST_MODELS` were not being applied during inference
+2. Debug logs showed that even though a model had temperature=0.95 in its configuration, the inference was using temperature=0.8
+3. The issue was traced to the parameter flow from model selection to inference
+
+**Root Cause:**
+1. When loading a model, we were not updating the runtime parameters (`currParams`) to match the model's configuration
+2. Instead, the UI was using whatever parameters were last set or saved in local storage
+3. This meant that model-specific parameters from `LIST_MODELS` were being ignored
+
+**The Fix:**
+1. Modified the `loadModel` function in `wllama.context.tsx` to:
+   ```typescript
+   const loadModel = async (model: DisplayedModel) => {
+     // ... existing validation code ...
+     try {
+       await model.cachedModel.validate();
+       await wllamaInstance.loadModel(model.cachedModel);
+       await initStopTokens();
+       // Added this section to set parameters from model configuration
+       const modelParams = getModelParams(model.url);
+       setParams({
+         nThreads: modelParams.nThreads,
+         nContext: modelParams.nContext,
+         nPredict: modelParams.nPredict,
+         nBatch: modelParams.nBatch,
+         temperature: modelParams.temperature,
+       });
+       // ... rest of the function ...
+     }
+   };
+   ```
+2. Added import for `getModelParams` from config file
+3. Built and verified the changes worked
+
+**Verification:**
+The debug logs now show:
+1. First model (Self-Aware-AI) using temperature=0.95 as configured
+2. After switching to Parenting model, temperature=0.8 as configured
+3. Other parameters (nPredict, nBatch, etc.) also properly switching between models
+
+**Key Learning:**
+The importance of synchronizing model-specific parameters at the time of model loading, rather than relying on globally stored parameters. This ensures each model uses its intended configuration for optimal performance.
 
 
 

@@ -14,6 +14,31 @@ RELOAD THE MODEL THAT WAS USED IN A CHAT CONVERSATION. Eg. save the model config
 
 
 
+
+#####################################
+
+## [0.0.10] - 2024-01-22
+
+### Added
+- 
+
+
+### Changed
+- All parameters are now working per model
+
+
+### Known Issues
+- 
+
+
+
+
+
+
+
+
+
+
 #####################################
 
 ## [0.0.9] - 2024-01-22
@@ -28,12 +53,6 @@ RELOAD THE MODEL THAT WAS USED IN A CHAT CONVERSATION. Eg. save the model config
 
 ### Known Issues
 - Model specific parameters are not being used. Only global is being used.
-
-
-
-
-
-
 
 
 
