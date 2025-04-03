@@ -10,8 +10,8 @@ command = ""
 
 [[routes]]
 pattern = "/api/videos/*"
-script = "workers-site/index.js"
+zone_name = "highermind.pages.dev"
 
 [[routes]]
 pattern = "/api/browse/*"
-script = "workers-site/index.js"
+zone_name = "highermind.pages.dev"
