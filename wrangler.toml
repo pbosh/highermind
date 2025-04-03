@@ -1,16 +1,13 @@
 name = "highermind"
 compatibility_date = "2024-04-03"
 
-[pages]
-pages_build_output_dir = "video_particles"
+[site]
+bucket = "video_particles"
 
-[pages.https]
-force = true
-
-[[pages.functions]]
+[[routes]]
 pattern = "/api/videos"
-function = "api/videos"
+script = "api/videos"
 
-[[pages.functions]]
+[[routes]]
 pattern = "/api/browse"
-function = "api/browse" 
+script = "api/browse" 
