@@ -1,6 +1,6 @@
 [build]
 command = ""
-output_directory = "video_particles"
+pages_build_output_dir = "video_particles"
 
 [functions]
 directory = "functions"
