@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'Static site - no build needed'",
+    "build": "mkdir -p dist && cp -r video_particles/* dist/ && cp -r functions dist/",
     "dev": "wrangler pages dev video_particles --compatibility-date=2024-01-01"
   },
   "devDependencies": {

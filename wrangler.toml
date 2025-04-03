@@ -3,7 +3,7 @@ command = "echo 'No build step required'"
 pages_build_output_dir = "video_particles"
 
 [site]
-bucket = "video_particles"
+bucket = "dist"
 
 [[redirects]]
   from = "/api/*"
