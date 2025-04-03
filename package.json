@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'Static site - no build needed'"
+    "build": "echo 'Static site - no build needed'",
+    "dev": "wrangler pages dev video_particles --compatibility-date=2024-01-01"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
   }
 } 
