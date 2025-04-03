@@ -1,0 +1,16 @@
+[build]
+command = ""
+
+[functions]
+directory = "functions"
+
+[[routes]]
+pattern = "/api/browse"
+script = "api/browse.js:onRequest"
+
+[[routes]]
+pattern = "/api/videos"
+script = "api/videos.js:onRequest"
+
+[site]
+bucket = "video_particles" 
