@@ -7,3 +7,4 @@ bucket = "video_particles"
 
 [build]
 command = ""
+pages_build_output_dir = "video_particles"
