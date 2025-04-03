@@ -1,17 +1,16 @@
 name = "highermind"
 compatibility_date = "2024-04-03"
 
+[site]
+bucket = "video_particles"
+
 [build]
 command = ""
-upload.format = "directory"
-dir = "video_particles"
 
-[[redirects]]
-from = "/api/videos"
-to = "/api/videos"
-status = 200
+[[routes]]
+pattern = "/api/videos"
+script = "api/videos"
 
-[[redirects]]
-from = "/api/browse"
-to = "/api/browse"
-status = 200 
+[[routes]]
+pattern = "/api/browse"
+script = "api/browse" 
