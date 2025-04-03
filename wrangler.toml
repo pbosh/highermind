@@ -1,6 +1,6 @@
 [build]
 command = "echo 'No build step required'"
-output_dir = "video_particles"
+pages_build_output_dir = "video_particles"
 
 [site]
 bucket = "video_particles"
