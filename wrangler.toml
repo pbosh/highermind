@@ -1,9 +1,16 @@
 [build]
-command = ""
 pages_build_output_dir = "video_particles"
 
 [functions]
 directory = "functions"
+
+[[routes]]
+pattern = "/api/browse"
+script = "api/browse.js"
+
+[[routes]]
+pattern = "/api/videos"
+script = "api/videos.js"
 
 [site]
 bucket = "video_particles" 
