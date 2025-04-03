@@ -9,9 +9,9 @@ bucket = "video_particles"
 command = ""
 
 [[routes]]
-pattern = "/api/videos"
-script = "api/videos"
+pattern = "/api/videos/*"
+script = "workers-site/index.js"
 
 [[routes]]
-pattern = "/api/browse"
-script = "api/browse"
+pattern = "/api/browse/*"
+script = "workers-site/index.js"
