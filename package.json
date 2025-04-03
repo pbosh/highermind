@@ -1,7 +1,8 @@
 {
   "name": "highermind",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "echo 'No build step needed - static files are ready'"
+    "build": "echo 'Static site - no build needed'"
   }
 } 
