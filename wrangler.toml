@@ -1,0 +1,9 @@
+[build]
+command = ""
+output_directory = "video_particles"
+
+[functions]
+directory = "functions"
+
+[site]
+bucket = "video_particles" 
