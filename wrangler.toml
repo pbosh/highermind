@@ -6,10 +6,18 @@ bucket = "./video_particles"
 
 [build]
 command = ""
-upload.format = "service-worker"
+
+[functions]
+directory = "functions"
 
 [[routes]]
-pattern = "/api/videos/*"
+pattern = "/api/videos"
+function = "api/videos"
 
 [[routes]]
-pattern = "/api/browse/*"
+pattern = "/api/browse"
+function = "api/browse"
+
+[[routes]]
+pattern = "/api/browse-config"
+function = "api/browse-config"
