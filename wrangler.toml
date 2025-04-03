@@ -8,7 +8,8 @@ bucket = "video_particles"
 [build]
 command = ""
 
-routes = [
-  "/api/videos/*",
-  "/api/browse/*"
-]
+[[routes]]
+pattern = "/api/videos/*"
+
+[[routes]]
+pattern = "/api/browse/*"
