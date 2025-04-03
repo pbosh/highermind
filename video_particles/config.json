@@ -1,0 +1,132 @@
+{
+    "sliders": {
+        "spreadX": {
+            "min": 0,
+            "max": 10,
+            "default": 0,
+            "description": "Spread points randomly in X direction"
+        },
+        "spreadY": {
+            "min": 0,
+            "max": 10,
+            "default": 0,
+            "description": "Spread points randomly in Y direction"
+        },
+        "spreadZ": {
+            "min": 0,
+            "max": 10,
+            "default": 0,
+            "description": "Spread points randomly in Z direction"
+        },
+        "heightMultiplier": {
+            "min": 1,
+            "max": 1000,
+            "default": 859,
+            "description": "Extend points in Z direction"
+        },
+        "heightSpacing": {
+            "min": 1,
+            "max": 100,
+            "default": 100,
+            "description": "Place a point every N pixels in height"
+        },
+        "randomness": {
+            "min": 0,
+            "max": 100,
+            "default": 0,
+            "description": "Control how random vs structured the points appear"
+        },
+        "particleSize": {
+            "min": 0.1,
+            "max": 10,
+            "default": 0.1,
+            "step": 0.1,
+            "description": "Size of each particle"
+        },
+        "brightness": {
+            "min": -100,
+            "max": 100,
+            "default": -30,
+            "description": "Adjust pixel brightness"
+        },
+        "sampling": {
+            "min": 1,
+            "max": 32,
+            "default": 4,
+            "description": "Sample every Nth pixel"
+        },
+        "overlay": {
+            "min": 0,
+            "max": 100,
+            "default": 5,
+            "description": "Opacity of video overlay on front plane"
+        },
+        "zoom": {
+            "min": 0,
+            "max": 10,
+            "default": 1.5,
+            "step": 0.1,
+            "description": "Overall zoom level of the visualization"
+        }
+    },
+    "mouse": {
+        "sensitivity": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.3
+        },
+        "startPosition": {
+            "x": -68.44,
+            "y": -6.16,
+            "z": 997.64
+        },
+        "range": {
+            "x": [-180, 180],
+            "y": [-180, 180],
+            "z": [-1000, 1000]
+        },
+        "hoverEnabled": true,
+        "showControls": false
+    },
+    "heroImage": {
+        "src": "art/_highermind-5.png",
+        "width": 600,
+        "positionFromBottom": 5
+    },
+    "aiButton": {
+        "show": false,
+        "positionFromBottom": 15,
+        "width": 350,
+        "height": 65,
+        "borderWidth": 1,
+        "borderColor": "#ffffff",
+        "borderOpacity": 1,
+        "borderRadius": 50,
+        "backgroundColor": "transparent",
+        "hoverBackgroundOpacity": 0.2,
+        "hoverBackgroundColor": "#ffffff",
+        "text": "Talk to The Eternal",
+        "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=The-Eternal-1",
+        "font": {
+            "family": "Roboto",
+            "size": 20,
+            "color": "#ffffff",
+            "opacity": 1
+        }
+    },
+    "footer": {
+        "text": "OFFLINE • PRIVATE • FREE\n200-300% BETTER THAN CHATGPT IN ITS SPECIFIC DOMAIN\n\nHigherMind AI Models are Hyper Intelligent Narrow Domain models with practical benefits for individuals, companies and organizations. Utilizing QSTaR and reasoning fine tune methods. They are free to use with no limits because they run locally on your computer. 100% offline, private and free. After initial download no WiFi required. TECH SPECS: Will run on any M series Mac (up to 4 years old) or a basic gaming PC with 6GB GPU or better.\n\n[FAQ](https://the-eternal.io) • [Terms of Service](/terms) • [Privacy Policy](/privacy)\n\n© 2025 HigherMind LLC • Joshua Tree, CA",
+        "style": {
+            "fontSize": 12,
+            "textColor": "#808080",
+            "linkColor": "#A0A0A0",
+            "linkHoverColor": "#ffffff",
+            "backgroundColor": "transparent",
+            "padding": "20px 0",
+            "position": {
+                "bottom": 0,
+                "width": "50%"
+            }
+        }
+    }
+}

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HigherMind - AI Models</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        #visualization-container {
+            width: 100%;
+            height: 85vh;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        #container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        #browse-container {
+            width: 100%;
+            background: #000;
+            margin-top: 0;
+            box-sizing: border-box;
+        }
+        #browse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, var(--item-width));
+            gap: var(--item-padding);
+            justify-content: center;
+            width: calc(100% - (2 * var(--item-padding)));
+            margin: 0 auto;
+            padding: var(--item-padding);
+            box-sizing: border-box;
+            max-width: calc(100vw - (2 * var(--item-padding)));
+        }
+        .browse-item {
+            width: var(--item-width);
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+        .browse-item:hover {
+            transform: scale(1.05);
+        }
+        .browse-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            background: #1a1a1a;
+            display: block;
+        }
+        .browse-item-title {
+            margin-top: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-align: center;
+            color: #fff;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        #video, #nextVideo {
+            display: none;
+        }
+        #videoControls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        button {
+            background: #444;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        #controlsToggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(40, 40, 40, 0.4);
+            padding: 4px;
+            border-radius: 3px;
+            z-index: 100;
+            opacity: 0.7;
+        }
+        #controlsToggle:hover {
+            opacity: 1;
+        }
+        #controlsToggle input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+            accent-color: #222;
+            background-color: #222;
+            border-color: #333;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #333;
+            position: relative;
+        }
+        #controlsToggle input[type="checkbox"]:checked {
+            background-color: #222;
+        }
+        #controlsToggle input[type="checkbox"]:checked:after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 1px;
+            width: 6px;
+            height: 10px;
+            border: solid #444;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .video-controls {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .video-controls #videoStatus {
+            margin-top: 8px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        #heroImage {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 0);
+            z-index: 200;
+            bottom: var(--hero-image-bottom);
+            width: var(--hero-image-width);
+            height: auto;
+            display: none; /* Will be shown via JS when image loads */
+            pointer-events: none; /* Allow mouse events to pass through to video effects */
+        }
+        #aiButton {
+            position: absolute;
+            left: 50%;
+            bottom: var(--ai-button-bottom);
+            transform: translate(-50%, 0);
+            z-index: 200;
+            text-decoration: none;
+            display: none; /* Will be shown via JS based on config */
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        #footer {
+            position: relative;
+            text-align: center;
+            font-family: 'Roboto', sans-serif;
+            background-color: #000;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #footer a {
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="visualization-container">
+        <div id="container"></div>
+        <img id="heroImage" alt="Higher Mind">
+        <div id="controls">
+            <div class="video-controls">
+                <button id="playPause">Pause</button>
+                <div id="videoStatus">Loading videos...</div>
+            </div>
+            <div class="slider-container">
+                <label>Spread X: <span id="spreadXVal">0</span></label>
+                <input type="range" id="spreadX" min="0" max="10" step="0.1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Spread Y: <span id="spreadYVal">0</span></label>
+                <input type="range" id="spreadY" min="0" max="10" step="0.1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Spread Z: <span id="spreadZVal">0</span></label>
+                <input type="range" id="spreadZ" min="0" max="10" step="0.1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Height Multiplier: <span id="heightMultiplierVal">1</span></label>
+                <input type="range" id="heightMultiplier" min="1" max="1000" step="1" value="1">
+            </div>
+            <div class="slider-container">
+                <label>Height Spacing: <span id="heightSpacingVal">10</span></label>
+                <input type="range" id="heightSpacing" min="1" max="100" step="1" value="10">
+            </div>
+            <div class="slider-container">
+                <label>Randomness: <span id="randomnessVal">50</span></label>
+                <input type="range" id="randomness" min="0" max="100" step="1" value="50">
+            </div>
+            <div class="slider-container">
+                <label>Particle Size: <span id="particleSizeVal">2</span></label>
+                <input type="range" id="particleSize" min="0.1" max="10" step="0.1" value="2">
+            </div>
+            <div class="slider-container">
+                <label>Brightness: <span id="brightnessVal">0</span></label>
+                <input type="range" id="brightness" min="-100" max="100" step="1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Sampling: <span id="samplingVal">8</span></label>
+                <input type="range" id="sampling" min="1" max="32" value="8">
+            </div>
+            <div class="slider-container">
+                <label>Overlay: <span id="overlayVal">0</span></label>
+                <input type="range" id="overlay" min="0" max="100" step="1" value="0">
+            </div>
+            <div class="slider-container">
+                <label>Zoom: <span id="zoomVal">1</span></label>
+                <input type="range" id="zoom" min="0" max="10" step="0.1" value="1">
+            </div>
+            <div class="button-container" style="margin-top: 20px; text-align: center;">
+                <button id="saveDefaults">Save As Default</button>
+                <button id="resetDefaults">Reset To Defaults</button>
+            </div>
+            <div style="margin-top: 10px; text-align: center;">
+                <label style="display: inline-flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="mouseHover">
+                    Enable Mouse Hover
+                </label>
+            </div>
+            <div id="mousePosition" style="position: fixed; bottom: 20px; left: 20px; color: white; font-family: monospace; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px;">
+                Center: X: 0 Y: 0 Z: 1000<br>
+                Mouse: X: <span id="mouseX">0</span> Y: <span id="mouseY">0</span> Z: <span id="mouseZ">0</span>
+            </div>
+        </div>
+        <div id="controlsToggle">
+            <input type="checkbox" id="showControls" checked>
+        </div>
+        <a id="aiButton" target="_blank">
+            <span>Talk to The Eternal AI</span>
+        </a>
+    </div>
+
+    <div id="browse-container">
+        <div id="browse-grid">
+            <!-- Browse items will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Main video element -->
+    <video id="video" crossorigin="anonymous" loop autoplay muted></video>
+    <!-- Preload next video -->
+    <video id="nextVideo" crossorigin="anonymous" loop preload="auto" muted></video>
+
+    <!-- Three.js and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Custom shaders -->
+    <script id="vertexShader" type="x-shader/x-vertex">
+        uniform float pointSize;
+        varying vec3 vColor;
+        
+        void main() {
+            vColor = color;
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            gl_PointSize = pointSize;
+        }
+    </script>
+    
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        varying vec3 vColor;
+        
+        void main() {
+            gl_FragColor = vec4(vColor, 1.0);
+        }
+    </script>
+
+    <!-- Main visualization script -->
+    <script src="static/visualization.js"></script>
+    <script src="static/browse.js"></script>
+    <script>
+        let allModels = [];
+        let currentIndex = 0;
+        let loadingMore = false;
+        let observer;
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function createLoadingIndicator() {
+            const loader = document.createElement('div');
+            loader.id = 'scroll-loader';
+            loader.style.textAlign = 'center';
+            loader.style.padding = '20px';
+            loader.style.color = '#808080';
+            loader.textContent = 'Loading more...';
+            return loader;
+        }
+
+        function setupInfiniteScroll(browseContainer) {
+            // Create and append loading indicator
+            const loadingIndicator = createLoadingIndicator();
+            browseContainer.appendChild(loadingIndicator);
+
+            // Setup Intersection Observer
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !loadingMore && currentIndex < allModels.length) {
+                        loadMoreItems(browseContainer);
+                    }
+                });
+            }, {
+                rootMargin: '100px' // Start loading slightly before reaching the end
+            });
+
+            // Observe the loading indicator
+            observer.observe(loadingIndicator);
+        }
+
+        function loadMoreItems(container) {
+            if (loadingMore) return;
+            loadingMore = true;
+
+            const batchSize = currentIndex === 0 ? 
+                browseConfig.initialBatchSize : 
+                browseConfig.batchSize;
+
+            const endIndex = Math.min(currentIndex + batchSize, allModels.length);
+            const batch = allModels.slice(currentIndex, endIndex);
+
+            batch.forEach(model => {
+                const item = createBrowseItem(model);
+                container.insertBefore(item, container.lastChild); // Insert before loading indicator
+            });
+
+            currentIndex = endIndex;
+            loadingMore = false;
+
+            // Hide loading indicator if we've loaded all items
+            if (currentIndex >= allModels.length) {
+                const loader = document.getElementById('scroll-loader');
+                if (loader) {
+                    loader.style.display = 'none';
+                }
+                if (observer) {
+                    observer.disconnect();
+                }
+            }
+        }
+
+        // Update the loadBrowseConfig function
+        async function loadBrowseConfig() {
+            try {
+                const response = await fetch('/api/browse-config');
+                browseConfig = await response.json();
+                
+                // Set CSS variables for grid layout
+                document.documentElement.style.setProperty('--item-width', browseConfig.itemWidth + 'px');
+                document.documentElement.style.setProperty('--item-padding', browseConfig.padding + 'px');
+                
+                // Get the browse container
+                const browseContainer = document.getElementById('browse-grid');
+                if (!browseContainer) return;
+
+                // Clear any existing content
+                browseContainer.innerHTML = '';
+
+                // Initialize the models array
+                allModels = browseConfig.randomizeLayout ? 
+                    shuffleArray(browseConfig.models) : 
+                    [...browseConfig.models];
+
+                // Setup infinite scroll
+                setupInfiniteScroll(browseContainer);
+
+                // Load initial batch
+                loadMoreItems(browseContainer);
+            } catch (error) {
+                console.error('Error loading browse config:', error);
+            }
+        }
+
+        // Function to update AI button styling from config
+        function updateAiButtonStyle(config) {
+            if (!config.aiButton) return;
+            
+            const button = document.getElementById('aiButton');
+            if (!button) return;
+
+            const cfg = config.aiButton;
+            
+            // Set button position from bottom of visualization container
+            document.documentElement.style.setProperty('--ai-button-bottom', cfg.positionFromBottom + '%');
+            
+            // Update size
+            button.style.width = cfg.width + 'px';
+            button.style.height = cfg.height + 'px';
+            
+            // Update border
+            const borderColor = cfg.borderColor.startsWith('#') ? 
+                hexToRGBA(cfg.borderColor, cfg.borderOpacity || 1) : cfg.borderColor;
+            button.style.border = `${cfg.borderWidth}px solid ${borderColor}`;
+            button.style.borderRadius = cfg.borderRadius + 'px';
+            
+            // Update background
+            button.style.backgroundColor = cfg.backgroundColor;
+            
+            // Add hover effect for background
+            button.addEventListener('mouseenter', () => {
+                const hoverColor = hexToRGBA(cfg.hoverBackgroundColor || '#ffffff', cfg.hoverBackgroundOpacity || 0.2);
+                button.style.backgroundColor = hoverColor;
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.backgroundColor = cfg.backgroundColor;
+            });
+            
+            // Update text
+            button.querySelector('span').textContent = cfg.text;
+            
+            // Update font
+            button.style.fontFamily = cfg.font.family;
+            button.style.fontSize = cfg.font.size + 'px';
+            const textColor = cfg.font.color.startsWith('#') ? 
+                hexToRGBA(cfg.font.color, cfg.font.opacity || 1) : cfg.font.color;
+            button.style.color = textColor;
+            
+            // Update link
+            button.href = cfg.link;
+        }
+
+        // Helper function to convert hex color to rgba
+        function hexToRGBA(hex, opacity) {
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+
+        // Load browse config when page loads
+        document.addEventListener('DOMContentLoaded', loadBrowseConfig);
+
+        // Wait for config to load then update button
+        document.addEventListener('configLoaded', function(e) {
+            updateAiButtonStyle(e.detail);
+        });
+
+        // Update hero image and button styling from config
+        function updateHeroElements(config) {
+            // Handle hero image
+            if (config.heroImage) {
+                const heroImage = document.getElementById('heroImage');
+                if (heroImage) {
+                    document.documentElement.style.setProperty('--hero-image-bottom', config.heroImage.positionFromBottom + '%');
+                    document.documentElement.style.setProperty('--hero-image-width', config.heroImage.width + 'px');
+                    heroImage.src = config.heroImage.src;
+                    
+                    // Show image once it loads
+                    heroImage.onload = () => {
+                        heroImage.style.display = 'block';
+                    };
+                }
+            }
+
+            // Handle button
+            if (config.aiButton) {
+                const button = document.getElementById('aiButton');
+                if (button) {
+                    // Show/hide button based on config
+                    button.style.display = config.aiButton.show ? 'flex' : 'none';
+                    
+                    // Rest of existing button styling
+                    const cfg = config.aiButton;
+                    document.documentElement.style.setProperty('--ai-button-bottom', cfg.positionFromBottom + '%');
+                    // ... rest of existing button style updates ...
+                }
+            }
+        }
+
+        // Wait for config to load then update elements
+        document.addEventListener('configLoaded', function(e) {
+            updateHeroElements(e.detail);
+        });
+
+        // Parse markdown-style links in text
+        function parseMarkdownLinks(text) {
+            // First replace line breaks with <br> tags
+            text = text.replace(/\n/g, '<br>');
+            // Then handle markdown links
+            return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+        }
+
+        // Update footer from config
+        function updateFooter(config) {
+            if (config.footer) {
+                const footer = document.getElementById('footer');
+                if (footer) {
+                    const cfg = config.footer;
+                    const style = cfg.style;
+                    
+                    // Apply styles
+                    footer.style.fontSize = style.fontSize + 'px';
+                    footer.style.color = style.textColor;
+                    footer.style.backgroundColor = style.backgroundColor;
+                    footer.style.padding = style.padding;
+                    footer.style.width = style.position.width;
+                    
+                    // Parse and set content
+                    footer.innerHTML = parseMarkdownLinks(cfg.text);
+                    
+                    // Style links
+                    const links = footer.getElementsByTagName('a');
+                    for (let link of links) {
+                        link.style.color = style.linkColor;
+                        link.addEventListener('mouseenter', () => {
+                            link.style.color = style.linkHoverColor;
+                        });
+                        link.addEventListener('mouseleave', () => {
+                            link.style.color = style.linkColor;
+                        });
+                    }
+                }
+            }
+        }
+
+        // Add footer update to config loading
+        document.addEventListener('configLoaded', function(e) {
+            updateFooter(e.detail);
+        });
+
+        // Create a browse item element
+        function createBrowseItem(model) {
+            const item = document.createElement('div');
+            item.className = 'browse-item';
+            
+            const link = document.createElement('a');
+            link.href = model.link;
+            link.target = '_blank';
+            
+            const img = document.createElement('img');
+            img.src = model.thumb;
+            img.alt = model.title || '';
+            
+            // Add loading="lazy" for better performance
+            img.loading = 'lazy';
+            
+            const title = document.createElement('div');
+            title.className = 'browse-item-title';
+            title.textContent = model.title || '';
+            
+            link.appendChild(img);
+            link.appendChild(title);
+            item.appendChild(link);
+            
+            return item;
+        }
+    </script>
+    <div id="footer"></div>
+</body>
+</html> 

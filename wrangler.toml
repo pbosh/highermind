@@ -1,0 +1,16 @@
+name = "hm-website"
+compatibility_date = "2024-04-03"
+
+[pages]
+pages_build_output_dir = "video_particles"
+
+[pages.https]
+force = true
+
+[[pages.functions]]
+pattern = "/api/videos"
+function = "api/videos"
+
+[[pages.functions]]
+pattern = "/api/browse"
+function = "api/browse" 

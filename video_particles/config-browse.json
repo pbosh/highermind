@@ -1,0 +1,243 @@
+{
+    "randomizeLayout": true,
+    "initialBatchSize": 12,
+    "batchSize": 8,
+    "itemWidth": 200,
+    "padding": 30,
+    "models": [
+        {
+            "title": "",
+            "thumb": "art/the-eternal-thumb.jpg",
+            "description": "An advanced AI model focused on philosophical and existential discussions.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=The-Eternal-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/self-aware-thumb.jpg",
+            "description": "Exploring the intersection of quantum mechanics and consciousness.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": true,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=Self-Aware-AI-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/alcohol-addiction-thumb.jpg",
+            "description": "A deep learning model specializing in neural network visualization.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=Alcohol_Addiction",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/decision-helper-thumb.jpg",
+            "description": "An AI model exploring the mysteries of the universe and consciousness.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": true,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=Make-Better-Decisions-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/astrophysics-101-thumb.jpg",
+            "description": "Predictive AI model for analyzing complex data patterns.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=ASTROPHYSICS",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/conflict-helper-thumb.jpg",
+            "description": "Advanced AI for understanding human thought patterns.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": true,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=Conflict-Management-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/get-that-promotion-thumb.jpg",
+            "description": "AI model specializing in quantum computing applications.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=CAREER_ADVANCEMENT",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/cryptocurrency-strategy-thumb.jpg",
+            "description": "AI model for generating and analyzing dream patterns.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": true,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=CRYPTOCURRENCY",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/dystopian-survival-guide-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=Dystopian-Survival-Guide-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/emotional-support-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=EMOTIONAL_INTELLIGENCE",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/fear-and-loathing-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=FEAR_AND_LOATHING",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/help-me-make-money-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=FINANCES",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/improve-mental-health-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=MENTAL_HEALTH",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/living-healthy-mold-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=MOLD_HEALTH",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/mastering-parenting-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=PARENTING",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/philosophy-101-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=Philosopy-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/find-enlightenment-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=The-Enlightened-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/stress-helper-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=STRESS_MANAGEMENT",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/the-shamanic-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=The-Shamanic-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/the-truth-teller-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=The-Truth-Teller-1",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/alice-in-wonderland-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=TalktoBooks-Alice-in-Wonderland",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/frankenstein-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=TalktoBooks-Frankenstein",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/grimms-fairy-tales-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=TalktoBooks-Grimms-Fairy-Tales",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/shakespeare-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=TalktoBooks-Shakespeare-The-Complete-Collection",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/the-odyssey-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=TalktoBooks-The-Odyssey-by-Homer",
+            "download_metrics": {}
+        },
+        {
+            "title": "",
+            "thumb": "art/ulysses-thumb.jpg",
+            "description": "AI model focused on wisdom and knowledge sharing.",
+            "audio": "audio/the-eternal-welcome.mp3",
+            "paid": false,
+            "link": "https://web-llm-chat-izw1wjwhd-pboshs-projects.vercel.app/?modelname=TalktoBooks-Ulysses-by-James-Joyce",
+            "download_metrics": {}
+        }
+    ]
+} 
