@@ -1,0 +1,7 @@
+{
+  "name": "highermind",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'No build step needed - static files are ready'"
+  }
+} 
