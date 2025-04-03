@@ -8,10 +8,7 @@ bucket = "video_particles"
 [build]
 command = ""
 
-[[routes]]
-pattern = "/api/videos/*"
-zone_name = "highermind.pages.dev"
-
-[[routes]]
-pattern = "/api/browse/*"
-zone_name = "highermind.pages.dev"
+routes = [
+  "/api/videos/*",
+  "/api/browse/*"
+]
