@@ -1,16 +1,17 @@
 [build]
-command = ""
+command = "exit 0"
+pages_build_output_dir = "video_particles"
+
+[site]
+bucket = "video_particles"
 
 [functions]
 directory = "functions"
 
 [[routes]]
 pattern = "/api/browse"
-script = "api/browse.js:onRequest"
+script = "api/browse.js"
 
 [[routes]]
 pattern = "/api/videos"
-script = "api/videos.js:onRequest"
-
-[site]
-bucket = "video_particles" 
+script = "api/videos.js" 
