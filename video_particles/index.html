@@ -9,6 +9,21 @@
         }
     </script>
     <style>
+        /* Base styles */
+        :root {
+            --item-width: 200px;
+            --item-padding: 30px;
+            --footer-width: 50%;
+        }
+
+        @media screen and (max-width: 768px) {
+            :root {
+                --item-width: 90vw;
+                --item-padding: 15px;
+                --footer-width: 90%;
+            }
+        }
+
         html, body {
             margin: 0;
             padding: 0;
@@ -37,7 +52,7 @@
         }
         #browse-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(var(--item-width), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: var(--item-padding);
             justify-content: center;
             width: 100%;
@@ -196,10 +211,8 @@
             text-align: center;
             font-family: 'Roboto', sans-serif;
             background-color: #000;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 40px auto 20px auto;
+            width: var(--footer-width);
         }
         #footer a {
             text-decoration: none;
@@ -208,22 +221,12 @@
 
         /* Add mobile-specific styles */
         @media screen and (max-width: 768px) {
-            :root {
-                --item-width: 90vw;
-                --item-padding: 15px;
-            }
-
             #browse-grid {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                max-width: 100%;
-                gap: var(--item-padding);
+                grid-template-columns: 1fr;
             }
 
             .browse-item {
                 width: var(--item-width);
-                max-width: var(--item-width);
             }
 
             #visualization-container {
@@ -239,12 +242,6 @@
 
             input[type="range"] {
                 width: 100%;
-            }
-
-            #footer {
-                width: var(--footer-mobile-width) !important;
-                margin-left: auto;
-                margin-right: auto;
             }
         }
     </style>
@@ -584,17 +581,6 @@
                     const cfg = config.footer;
                     const style = cfg.style;
                     
-                    // Set CSS variables for responsive width
-                    document.documentElement.style.setProperty('--footer-desktop-width', style.position.width);
-                    document.documentElement.style.setProperty('--footer-mobile-width', style.position.mobileWidth || '90%');
-                    
-                    // Apply styles
-                    footer.style.fontSize = style.fontSize + 'px';
-                    footer.style.color = style.textColor;
-                    footer.style.backgroundColor = style.backgroundColor;
-                    footer.style.padding = style.padding;
-                    footer.style.width = style.position.width;
-                    
                     // Parse and set content
                     footer.innerHTML = parseMarkdownLinks(cfg.text);
                     
@@ -614,9 +600,15 @@
         }
 
         // Wait for config to load then update elements
-        document.addEventListener('configLoaded', function(e) {
-            updateHeroElements(e.detail);
-            updateFooter(e.detail);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only initialize what's needed for the hero section and footer
+            fetch('/config.json')
+                .then(response => response.json())
+                .then(config => {
+                    updateHeroElements(config);
+                    updateFooter(config);
+                })
+                .catch(error => console.error('Error loading config:', error));
         });
 
         // Create a browse item element
