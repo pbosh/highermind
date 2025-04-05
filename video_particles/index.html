@@ -214,27 +214,37 @@
             }
 
             #browse-grid {
-                grid-template-columns: 1fr;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 max-width: 100%;
+                gap: var(--item-padding);
+            }
+
+            .browse-item {
+                width: var(--item-width);
+                max-width: var(--item-width);
             }
 
             #visualization-container {
-                height: 60vh;  /* Shorter height on mobile */
+                height: 60vh;
             }
 
             #controls {
-                width: 90%;  /* Wider controls on mobile */
+                width: 90%;
                 right: 50%;
                 transform: translateX(50%);
                 top: 20px;
             }
 
             input[type="range"] {
-                width: 100%;  /* Full width sliders */
+                width: 100%;
             }
 
             #footer {
-                width: 90% !important;  /* Override desktop width on mobile */
+                width: var(--footer-mobile-width) !important;
+                margin-left: auto;
+                margin-right: auto;
             }
         }
     </style>
@@ -576,7 +586,7 @@
                     
                     // Set CSS variables for responsive width
                     document.documentElement.style.setProperty('--footer-desktop-width', style.position.width);
-                    document.documentElement.style.setProperty('--footer-mobile-width', style.position.mobileWidth);
+                    document.documentElement.style.setProperty('--footer-mobile-width', style.position.mobileWidth || '90%');
                     
                     // Apply styles
                     footer.style.fontSize = style.fontSize + 'px';
