@@ -11,6 +11,7 @@
     <style>
         /* Base styles */
         :root {
+            --grid-max-width: 1200px;
             --item-width: 200px;
             --item-padding: 30px;
             --footer-width: 50%;
@@ -18,7 +19,8 @@
 
         @media screen and (max-width: 768px) {
             :root {
-                --item-width: 90vw;
+                --grid-max-width: 100%;
+                --item-width: 90%;
                 --item-padding: 15px;
                 --footer-width: 90%;
             }
@@ -49,26 +51,29 @@
             background: #000;
             margin-top: 0;
             box-sizing: border-box;
+            display: flex;
+            justify-content: center;
         }
         #browse-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
             gap: var(--item-padding);
-            justify-content: center;
             width: 100%;
-            max-width: 1200px;
+            max-width: var(--grid-max-width);
             margin: 0 auto;
             padding: var(--item-padding);
             box-sizing: border-box;
         }
         .browse-item {
             width: 100%;
-            max-width: var(--item-width);
             margin: 0 auto;
             cursor: pointer;
             transition: transform 0.2s;
-            text-decoration: none;
+        }
+        .browse-item a {
             display: block;
+            text-decoration: none;
+            width: 100%;
         }
         .browse-item:hover {
             transform: scale(1.05);
@@ -222,12 +227,13 @@
         /* Add mobile-specific styles */
         @media screen and (max-width: 768px) {
             #browse-grid {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: 1fr;
+                padding: var(--item-padding);
             }
 
             .browse-item {
-                width: var(--item-width);
-                max-width: none;
+                width: 100%;
+                max-width: 400px; /* Prevent images from getting too large on tablets */
             }
 
             #visualization-container {
