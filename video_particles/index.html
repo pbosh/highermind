@@ -15,6 +15,7 @@
             --grid-columns: 4;
             --item-width: 200px;
             --item-padding: 30px;
+            --is-mobile: 0;
         }
 
         @media screen and (max-width: 768px) {
@@ -23,6 +24,7 @@
                 --grid-columns: 1;
                 --item-width: 90%;
                 --item-padding: 15px;
+                --is-mobile: 1;
             }
         }
 
@@ -66,7 +68,7 @@
             box-sizing: border-box;
         }
         .browse-item {
-            width: 100%;
+            width: var(--item-width);
             margin: 0 auto;
             cursor: pointer;
             transition: transform 0.2s;
@@ -380,6 +382,16 @@
         let loadingMore = false;
         let observer;
 
+        // Global mobile detection
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isMobileWidth = window.matchMedia('(max-width: 768px)').matches;
+        const isMobile = isMobileDevice || isMobileWidth;
+
+        // Update mobile status when screen size changes
+        window.matchMedia('(max-width: 768px)').addListener((e) => {
+            document.documentElement.style.setProperty('--is-mobile', e.matches ? '1' : '0');
+        });
+
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -583,7 +595,7 @@
                     footer.style.color = style.textColor;
                     footer.style.backgroundColor = style.backgroundColor;
                     footer.style.padding = style.padding;
-                    footer.style.width = style.position.width;
+                    footer.style.width = isMobile ? style.position.mobileWidth : style.position.width;
                     footer.style.margin = '40px auto';
                     footer.style.whiteSpace = 'pre-wrap';
                     footer.style.maxWidth = '100%';
@@ -601,13 +613,10 @@
                         link.addEventListener('mouseleave', () => link.style.color = style.linkColor);
                     }
 
-                    // Add mobile width handling with immediate check
-                    const mediaQuery = window.matchMedia('(max-width: 768px)');
-                    const updateWidth = (e) => {
+                    // Update width when screen size changes
+                    window.matchMedia('(max-width: 768px)').addListener((e) => {
                         footer.style.width = e.matches ? style.position.mobileWidth : style.position.width;
-                    };
-                    mediaQuery.addListener(updateWidth);
-                    updateWidth(mediaQuery); // Apply immediately
+                    });
                 }
             }
         }
