@@ -10,6 +10,22 @@
     </script>
     <style>
         /* Base styles */
+        :root {
+            --grid-max-width: 1200px;
+            --grid-columns: 4;
+            --item-width: 200px;
+            --item-padding: 30px;
+        }
+
+        @media screen and (max-width: 768px) {
+            :root {
+                --grid-max-width: 100%;
+                --grid-columns: 1;
+                --item-width: 90%;
+                --item-padding: 15px;
+            }
+        }
+
         html, body {
             margin: 0;
             padding: 0;
@@ -41,7 +57,7 @@
         }
         #browse-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+            grid-template-columns: repeat(var(--grid-columns), 1fr);
             gap: var(--item-padding);
             width: 100%;
             max-width: var(--grid-max-width);
@@ -201,6 +217,13 @@
             position: relative;
             text-align: center;
             font-family: 'Roboto', sans-serif;
+            margin: 40px auto;
+            padding: 20px 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         #footer a {
             text-decoration: none;
@@ -215,8 +238,8 @@
             }
 
             .browse-item {
-                width: 100%;
-                max-width: 400px; /* Prevent images from getting too large on tablets */
+                width: 90%;
+                margin: 0 auto;
             }
 
             #visualization-container {
@@ -561,8 +584,10 @@
                     footer.style.backgroundColor = style.backgroundColor;
                     footer.style.padding = style.padding;
                     footer.style.width = style.position.width;
-                    footer.style.margin = '0 auto';  // Center the footer
-                    footer.style.whiteSpace = 'pre-wrap';  // Preserve line breaks
+                    footer.style.margin = '40px auto';
+                    footer.style.whiteSpace = 'pre-wrap';
+                    footer.style.maxWidth = '100%';
+                    footer.style.boxSizing = 'border-box';
                     
                     // Set the content
                     footer.innerHTML = parseMarkdownLinks(config.footer.text);
@@ -576,13 +601,13 @@
                         link.addEventListener('mouseleave', () => link.style.color = style.linkColor);
                     }
 
-                    // Add mobile width handling
+                    // Add mobile width handling with immediate check
                     const mediaQuery = window.matchMedia('(max-width: 768px)');
                     const updateWidth = (e) => {
                         footer.style.width = e.matches ? style.position.mobileWidth : style.position.width;
                     };
                     mediaQuery.addListener(updateWidth);
-                    updateWidth(mediaQuery);
+                    updateWidth(mediaQuery); // Apply immediately
                 }
             }
         }
