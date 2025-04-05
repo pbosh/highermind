@@ -7,7 +7,7 @@ let isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera M
 // Initialize browse section
 async function initBrowse() {
     try {
-        const response = await fetch('/api/browse-config');
+        const response = await fetch('/config-browse.json');
         const data = await response.json();
         
         // Store the configuration

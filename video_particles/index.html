@@ -440,7 +440,7 @@
         // Update the loadBrowseConfig function
         async function loadBrowseConfig() {
             try {
-                const response = await fetch('/api/browse-config');
+                const response = await fetch('/config-browse.json');
                 browseConfig = await response.json();
                 
                 // Set CSS variables for grid layout
