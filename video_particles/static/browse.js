@@ -13,7 +13,7 @@ async function initBrowse() {
         // Store the configuration
         browseConfig = data;
         
-        // Set default CSS variables - these will be overridden by media queries when needed
+        // Set default CSS variables for desktop
         document.documentElement.style.setProperty('--item-width', `${data.itemWidth}px`);
         document.documentElement.style.setProperty('--item-padding', `${data.padding}px`);
         
