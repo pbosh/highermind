@@ -2,6 +2,7 @@ let allModels = [];
 let currentIndex = 0;
 let loadingMore = false;
 let browseConfig = null;
+let isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 // Initialize browse section
 async function initBrowse() {
@@ -12,9 +13,14 @@ async function initBrowse() {
         // Store the configuration
         browseConfig = data;
         
-        // Set CSS variables for grid layout
-        document.documentElement.style.setProperty('--item-width', `${data.itemWidth}px`);
-        document.documentElement.style.setProperty('--item-padding', `${data.padding}px`);
+        // Set CSS variables for grid layout based on device type
+        if (isMobileDevice) {
+            document.documentElement.style.setProperty('--item-width', data.mobileItemWidth || '90vw');
+            document.documentElement.style.setProperty('--item-padding', `${data.mobilePadding || 15}px`);
+        } else {
+            document.documentElement.style.setProperty('--item-width', `${data.itemWidth}px`);
+            document.documentElement.style.setProperty('--item-padding', `${data.padding}px`);
+        }
         
         // Get the grid container
         const grid = document.getElementById('browse-grid');

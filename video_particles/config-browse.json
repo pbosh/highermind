@@ -3,7 +3,9 @@
     "initialBatchSize": 12,
     "batchSize": 8,
     "itemWidth": 200,
+    "mobileItemWidth": "90vw",
     "padding": 30,
+    "mobilePadding": 15,
     "models": [
         {
             "title": "",
