@@ -204,6 +204,43 @@
             text-decoration: none;
             transition: color 0.3s ease;
         }
+
+        /* Add mobile-specific styles */
+        @media screen and (max-width: 768px) {
+            #browse-grid {
+                grid-template-columns: 1fr;  /* Single column */
+                gap: 20px;  /* Smaller gap for mobile */
+                padding: 15px;  /* Smaller padding for mobile */
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .browse-item {
+                width: 100%;  /* Full width items */
+                max-width: 400px;  /* Maximum width for items */
+                margin: 0 auto;  /* Center items */
+            }
+
+            .browse-item img {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            #visualization-container {
+                height: 60vh;  /* Shorter height on mobile */
+            }
+
+            #controls {
+                width: 90%;  /* Wider controls on mobile */
+                right: 50%;
+                transform: translateX(50%);
+                top: 20px;
+            }
+
+            input[type="range"] {
+                width: 100%;  /* Full width sliders */
+            }
+        }
     </style>
 </head>
 <body>
