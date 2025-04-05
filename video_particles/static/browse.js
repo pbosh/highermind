@@ -13,9 +13,14 @@ async function initBrowse() {
         // Store the configuration
         browseConfig = data;
         
-        // Set default CSS variables for desktop
-        document.documentElement.style.setProperty('--item-width', `${data.itemWidth}px`);
-        document.documentElement.style.setProperty('--item-padding', `${data.padding}px`);
+        // Set CSS variables based on device type
+        if (isMobileDevice) {
+            document.documentElement.style.setProperty('--item-width', '90vw');
+            document.documentElement.style.setProperty('--item-padding', '15px');
+        } else {
+            document.documentElement.style.setProperty('--item-width', `${data.itemWidth}px`);
+            document.documentElement.style.setProperty('--item-padding', `${data.padding}px`);
+        }
         
         // Get the grid container
         const grid = document.getElementById('browse-grid');
@@ -80,17 +85,26 @@ function loadMoreItems(container) {
     const batch = allModels.slice(currentIndex, endIndex);
     
     batch.forEach(model => {
-        const item = document.createElement('a');
-        item.href = model.link;
+        const item = document.createElement('div');
         item.className = 'browse-item';
-        item.target = '_blank';
+        
+        const link = document.createElement('a');
+        link.href = model.link;
+        link.target = '_blank';
         
         const img = document.createElement('img');
         img.src = model.thumb;
         img.alt = model.title || '';
         img.loading = 'lazy';
         
-        item.appendChild(img);
+        const title = document.createElement('div');
+        title.className = 'browse-item-title';
+        title.textContent = model.title || '';
+        
+        link.appendChild(img);
+        link.appendChild(title);
+        item.appendChild(link);
+        
         container.insertBefore(item, container.lastChild);
     });
     

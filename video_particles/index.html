@@ -222,11 +222,12 @@
         /* Add mobile-specific styles */
         @media screen and (max-width: 768px) {
             #browse-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
             }
 
             .browse-item {
                 width: var(--item-width);
+                max-width: none;
             }
 
             #visualization-container {
@@ -534,74 +535,50 @@
             updateAiButtonStyle(e.detail);
         });
 
-        // Update hero image and button styling from config
+        // Only keep hero and footer related functions
         function updateHeroElements(config) {
-            // Handle hero image
             if (config.heroImage) {
                 const heroImage = document.getElementById('heroImage');
                 if (heroImage) {
                     document.documentElement.style.setProperty('--hero-image-bottom', config.heroImage.positionFromBottom + '%');
                     document.documentElement.style.setProperty('--hero-image-width', config.heroImage.width + 'px');
                     heroImage.src = config.heroImage.src;
-                    
-                    // Show image once it loads
-                    heroImage.onload = () => {
-                        heroImage.style.display = 'block';
-                    };
+                    heroImage.onload = () => heroImage.style.display = 'block';
                 }
             }
 
-            // Handle button
             if (config.aiButton) {
                 const button = document.getElementById('aiButton');
                 if (button) {
-                    // Show/hide button based on config
                     button.style.display = config.aiButton.show ? 'flex' : 'none';
-                    
-                    // Rest of existing button styling
-                    const cfg = config.aiButton;
-                    document.documentElement.style.setProperty('--ai-button-bottom', cfg.positionFromBottom + '%');
+                    document.documentElement.style.setProperty('--ai-button-bottom', config.aiButton.positionFromBottom + '%');
                 }
             }
         }
 
-        // Parse markdown-style links in text
         function parseMarkdownLinks(text) {
-            // First replace line breaks with <br> tags
-            text = text.replace(/\n/g, '<br>');
-            // Then handle markdown links
-            return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+            return text.replace(/\n/g, '<br>').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
         }
 
-        // Update footer from config
         function updateFooter(config) {
             if (config.footer) {
                 const footer = document.getElementById('footer');
                 if (footer) {
-                    const cfg = config.footer;
-                    const style = cfg.style;
+                    const style = config.footer.style;
+                    footer.innerHTML = parseMarkdownLinks(config.footer.text);
                     
-                    // Parse and set content
-                    footer.innerHTML = parseMarkdownLinks(cfg.text);
-                    
-                    // Style links
                     const links = footer.getElementsByTagName('a');
                     for (let link of links) {
                         link.style.color = style.linkColor;
-                        link.addEventListener('mouseenter', () => {
-                            link.style.color = style.linkHoverColor;
-                        });
-                        link.addEventListener('mouseleave', () => {
-                            link.style.color = style.linkColor;
-                        });
+                        link.addEventListener('mouseenter', () => link.style.color = style.linkHoverColor);
+                        link.addEventListener('mouseleave', () => link.style.color = style.linkColor);
                     }
                 }
             }
         }
 
-        // Wait for config to load then update elements
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Only initialize what's needed for the hero section and footer
             fetch('/config.json')
                 .then(response => response.json())
                 .then(config => {
