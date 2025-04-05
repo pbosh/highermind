@@ -37,7 +37,7 @@
         }
         #browse-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, var(--item-width));
+            grid-template-columns: repeat(auto-fit, minmax(var(--item-width), 1fr));
             gap: var(--item-padding);
             justify-content: center;
             width: calc(100% - (2 * var(--item-padding)));
@@ -207,17 +207,20 @@
 
         /* Add mobile-specific styles */
         @media screen and (max-width: 768px) {
+            :root {
+                --item-width: 90vw !important;
+                --item-padding: 15px !important;
+            }
+
             #browse-grid {
                 grid-template-columns: 1fr;  /* Single column */
                 gap: var(--item-padding);
                 padding: var(--item-padding);
-                width: 100%;
-                max-width: 100%;
             }
 
             .browse-item {
-                width: 100%;  /* Full width items */
-                margin: 0 auto;  /* Center items */
+                width: var(--item-width);
+                margin: 0 auto;
             }
 
             .browse-item img {
@@ -241,7 +244,7 @@
             }
 
             #footer {
-                width: var(--footer-mobile-width) !important;  /* Override desktop width on mobile */
+                width: 90% !important;  /* Override desktop width on mobile */
             }
         }
     </style>
