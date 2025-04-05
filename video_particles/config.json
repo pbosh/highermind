@@ -86,7 +86,8 @@
             "z": [-1000, 1000]
         },
         "hoverEnabled": true,
-        "showControls": false
+        "showControls": false,
+        "mobileInteraction": false
     },
     "heroImage": {
         "src": "art/_highermind-5.png",
@@ -125,7 +126,8 @@
             "padding": "20px 0",
             "position": {
                 "bottom": 0,
-                "width": "50%"
+                "width": "50%",
+                "mobileWidth": "90%"
             }
         }
     }

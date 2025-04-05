@@ -11,6 +11,7 @@ let wasPlaying = false; // Track video state
 let animationFrameId = null; // Track animation frame
 let mousePosition = { x: 0, y: 0, z: 0 };
 let isMouseHoverEnabled = false;
+let isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 let centerPosition = { x: 0, y: 0, z: 1000 };
 let targetCameraPosition = new THREE.Vector3();
 let currentCameraPosition = new THREE.Vector3();
@@ -109,18 +110,25 @@ async function loadConfig() {
             }
         }
         
-        // Set initial mouse states from config
+        // Initialize mouse hover based on device and config
         if (config.mouse) {
-            // Set hover state
-            if (typeof config.mouse.hoverEnabled !== 'undefined') {
-                isMouseHoverEnabled = config.mouse.hoverEnabled;
-                const mouseHoverCheckbox = document.getElementById('mouseHover');
-                if (mouseHoverCheckbox) {
-                    mouseHoverCheckbox.checked = isMouseHoverEnabled;
-                    if (controls) {
-                        controls.enabled = !isMouseHoverEnabled;
-                    }
-                }
+            isMouseHoverEnabled = isMobileDevice ? 
+                (config.mouse.mobileInteraction && config.mouse.hoverEnabled) : 
+                config.mouse.hoverEnabled;
+            
+            // If on mobile and interaction is disabled, prevent touch events
+            if (isMobileDevice && !config.mouse.mobileInteraction) {
+                const container = document.getElementById('visualization-container');
+                container.style.pointerEvents = 'none';
+                
+                // Enable scrolling through the container
+                container.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                }, { passive: true });
+                
+                container.addEventListener('touchmove', function(e) {
+                    e.stopPropagation();
+                }, { passive: true });
             }
             
             // Set show controls state
@@ -171,6 +179,8 @@ function saveDefaults() {
     };
     defaultConfig.mouse.hoverEnabled = isMouseHoverEnabled;
     defaultConfig.mouse.showControls = document.getElementById('showControls').checked;
+    // Preserve mobile interaction setting
+    defaultConfig.mouse.mobileInteraction = config.mouse.mobileInteraction;
 
     // Save to localStorage instead of server
     try {

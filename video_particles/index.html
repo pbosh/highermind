@@ -240,6 +240,10 @@
             input[type="range"] {
                 width: 100%;  /* Full width sliders */
             }
+
+            #footer {
+                width: var(--footer-mobile-width) !important;  /* Override desktop width on mobile */
+            }
         }
     </style>
 </head>
@@ -583,6 +587,10 @@
                 if (footer) {
                     const cfg = config.footer;
                     const style = cfg.style;
+                    
+                    // Set CSS variables for responsive width
+                    document.documentElement.style.setProperty('--footer-desktop-width', style.position.width);
+                    document.documentElement.style.setProperty('--footer-mobile-width', style.position.mobileWidth);
                     
                     // Apply styles
                     footer.style.fontSize = style.fontSize + 'px';
