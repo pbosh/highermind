@@ -7,7 +7,7 @@ let isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera M
 // Initialize browse section
 async function initBrowse() {
     try {
-        const response = await fetch('/api/browse');
+        const response = await fetch('/api/browse-config');
         const data = await response.json();
         
         // Store the configuration
@@ -30,7 +30,7 @@ async function initBrowse() {
         grid.innerHTML = '';
         
         // Store all models
-        allModels = data.models;
+        allModels = data.randomizeLayout ? shuffleArray(data.models) : [...data.models];
         
         // Create and append loading indicator
         const loadingIndicator = document.createElement('div');
@@ -62,6 +62,16 @@ async function initBrowse() {
     }
 }
 
+// Helper function to shuffle array
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // Load more items
 function loadMoreItems(container) {
     if (loadingMore) return;
@@ -82,7 +92,7 @@ function loadMoreItems(container) {
         
         const img = document.createElement('img');
         img.src = model.thumb;
-        img.alt = model.title;
+        img.alt = model.title || '';
         img.loading = 'lazy';
         
         item.appendChild(img);

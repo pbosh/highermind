@@ -561,15 +561,9 @@
                     // Rest of existing button styling
                     const cfg = config.aiButton;
                     document.documentElement.style.setProperty('--ai-button-bottom', cfg.positionFromBottom + '%');
-                    // ... rest of existing button style updates ...
                 }
             }
         }
-
-        // Wait for config to load then update elements
-        document.addEventListener('configLoaded', function(e) {
-            updateHeroElements(e.detail);
-        });
 
         // Parse markdown-style links in text
         function parseMarkdownLinks(text) {
@@ -616,8 +610,9 @@
             }
         }
 
-        // Add footer update to config loading
+        // Wait for config to load then update elements
         document.addEventListener('configLoaded', function(e) {
+            updateHeroElements(e.detail);
             updateFooter(e.detail);
         });
 
