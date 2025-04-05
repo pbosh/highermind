@@ -25,9 +25,6 @@ async function initBrowse() {
         // Create and append loading indicator
         const loadingIndicator = document.createElement('div');
         loadingIndicator.id = 'scroll-loader';
-        loadingIndicator.style.textAlign = 'center';
-        loadingIndicator.style.padding = '20px';
-        loadingIndicator.style.color = '#808080';
         loadingIndicator.textContent = 'Loading more...';
         grid.appendChild(loadingIndicator);
         
@@ -62,6 +59,31 @@ function shuffleArray(array) {
     return shuffled;
 }
 
+// Create a browse item element
+function createBrowseItem(model) {
+    const item = document.createElement('div');
+    item.className = 'browse-item';
+    
+    const link = document.createElement('a');
+    link.href = model.link;
+    link.target = '_blank';
+    
+    const img = document.createElement('img');
+    img.src = model.thumb;
+    img.alt = model.title || '';
+    img.loading = 'lazy';
+    
+    const title = document.createElement('div');
+    title.className = 'browse-item-title';
+    title.textContent = model.title || '';
+    
+    link.appendChild(img);
+    link.appendChild(title);
+    item.appendChild(link);
+    
+    return item;
+}
+
 // Load more items
 function loadMoreItems(container) {
     if (loadingMore) return;
@@ -75,26 +97,7 @@ function loadMoreItems(container) {
     const batch = allModels.slice(currentIndex, endIndex);
     
     batch.forEach(model => {
-        const item = document.createElement('div');
-        item.className = 'browse-item';
-        
-        const link = document.createElement('a');
-        link.href = model.link;
-        link.target = '_blank';
-        
-        const img = document.createElement('img');
-        img.src = model.thumb;
-        img.alt = model.title || '';
-        img.loading = 'lazy';
-        
-        const title = document.createElement('div');
-        title.className = 'browse-item-title';
-        title.textContent = model.title || '';
-        
-        link.appendChild(img);
-        link.appendChild(title);
-        item.appendChild(link);
-        
+        const item = createBrowseItem(model);
         container.insertBefore(item, container.lastChild);
     });
     
