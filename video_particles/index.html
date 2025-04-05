@@ -10,25 +10,6 @@
     </script>
     <style>
         /* Base styles */
-        :root {
-            --grid-max-width: 1200px;
-            --item-width: 200px;
-            --item-padding: 30px;
-            --footer-width: 50%;
-            --hero-image-bottom: 0;
-            --hero-image-width: auto;
-            --ai-button-bottom: 0;
-        }
-
-        @media screen and (max-width: 768px) {
-            :root {
-                --grid-max-width: 100%;
-                --item-width: 90%;
-                --item-padding: 15px;
-                --footer-width: 90%;
-            }
-        }
-
         html, body {
             margin: 0;
             padding: 0;
@@ -220,9 +201,6 @@
             position: relative;
             text-align: center;
             font-family: 'Roboto', sans-serif;
-            background-color: #000;
-            margin: 40px auto 20px auto;
-            width: var(--footer-width);
         }
         #footer a {
             text-decoration: none;
@@ -576,14 +554,35 @@
                 const footer = document.getElementById('footer');
                 if (footer) {
                     const style = config.footer.style;
+                    
+                    // Apply all styles from config
+                    footer.style.fontSize = `${style.fontSize}px`;
+                    footer.style.color = style.textColor;
+                    footer.style.backgroundColor = style.backgroundColor;
+                    footer.style.padding = style.padding;
+                    footer.style.width = style.position.width;
+                    footer.style.margin = '0 auto';  // Center the footer
+                    footer.style.whiteSpace = 'pre-wrap';  // Preserve line breaks
+                    
+                    // Set the content
                     footer.innerHTML = parseMarkdownLinks(config.footer.text);
                     
+                    // Style all links
                     const links = footer.getElementsByTagName('a');
                     for (let link of links) {
                         link.style.color = style.linkColor;
+                        link.style.textDecoration = 'none';
                         link.addEventListener('mouseenter', () => link.style.color = style.linkHoverColor);
                         link.addEventListener('mouseleave', () => link.style.color = style.linkColor);
                     }
+
+                    // Add mobile width handling
+                    const mediaQuery = window.matchMedia('(max-width: 768px)');
+                    const updateWidth = (e) => {
+                        footer.style.width = e.matches ? style.position.mobileWidth : style.position.width;
+                    };
+                    mediaQuery.addListener(updateWidth);
+                    updateWidth(mediaQuery);
                 }
             }
         }
